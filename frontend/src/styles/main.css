@@ -52,3 +52,29 @@ padding:10px;
 border-radius:5px;
 white-space:pre-wrap;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+.home-container{
+  min-height: 100vh;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  color: white;
+}
+
+.card{
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.card:hover{
+  transform: translateY(-8px);
+}
