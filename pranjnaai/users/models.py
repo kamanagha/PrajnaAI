@@ -1,12 +1,19 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class User(models.Model):
 
-    name = models.CharField(max_length=100)
+class User(AbstractUser):
+
+    # 🔥 Remove username login, use email instead
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=200)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Extra fields
+    name = models.CharField(max_length=100)
+
+    # 🔑 Login with email
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']   # required when creating superuser
 
     def __str__(self):
         return self.email
