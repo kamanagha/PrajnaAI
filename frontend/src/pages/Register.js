@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useTheme } from "../context/ThemeContext";
 
 function Register() {
   const navigate = useNavigate();
+  const { currentTheme, themes } = useTheme();
+  const theme = themes[currentTheme];
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +19,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [popupMessage, setPopupMessage] = useState({ show: false, message: "", type: "" });
 
   // Check if already logged in
   useEffect(() => {
@@ -24,6 +28,22 @@ function Register() {
       navigate("/dashboard");
     }
   }, [navigate]);
+
+  // Auto-hide popup after 3 seconds
+  useEffect(() => {
+    if (popupMessage.show) {
+      const timer = setTimeout(() => {
+        setPopupMessage({ show: false, message: "", type: "" });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popupMessage.show]);
+
+  const showPopup = (message, type) => {
+    setPopupMessage({ show: true, message, type });
+    setError("");
+    setSuccess("");
+  };
 
   // Calculate password strength
   const calculatePasswordStrength = (pass) => {
@@ -48,29 +68,29 @@ function Register() {
 
     // Validation
     if (!name || !email || !password || !confirmPassword) {
-      setError("All fields are required");
+      showPopup("All fields are required", "error");
       return;
     }
 
     if (name.length < 2) {
-      setError("Name must be at least 2 characters");
+      showPopup("Name must be at least 2 characters", "error");
       return;
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address");
+      showPopup("Please enter a valid email address", "error");
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      showPopup("Password must be at least 6 characters", "error");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showPopup("Passwords do not match", "error");
       return;
     }
 
@@ -85,6 +105,7 @@ function Register() {
 
       setLoading(false);
       setSuccess(res.data.message || "Registration successful! Redirecting to login...");
+      showPopup(res.data.message || "Registration successful! ✅", "success");
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
@@ -99,19 +120,19 @@ function Register() {
       // 🔥 Handle duplicate email specifically
       if (err.response && err.response.data.error) {
         if (err.response.data.error.toLowerCase().includes("email")) {
-          setError("⚠️ This email is already registered. Try logging in instead.");
+          showPopup("⚠️ This email is already registered. Try logging in instead.", "error");
         } else {
-          setError(err.response.data.error);
+          showPopup(err.response.data.error, "error");
         }
       } 
       else if (err.response && err.response.data.message) {
-        setError(err.response.data.message);
+        showPopup(err.response.data.message, "error");
       } 
       else if (err.request) {
-        setError("Network error. Please check your connection.");
+        showPopup("Network error. Please check your connection.", "error");
       } 
       else {
-        setError("Registration failed. Please try again.");
+        showPopup("Registration failed. Please try again.", "error");
       }
     }
   };
@@ -133,16 +154,106 @@ function Register() {
     return { color: "#44ff44", text: "Very Strong", width: "100%" };
   };
 
-  return (
-    <div style={{
+  // Dynamic styles based on theme
+  const styles = {
+    container: {
       minHeight: "calc(100vh - 80px)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%)",
+      background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.surface} 50%, ${theme.background} 100%)`,
       padding: "2rem 1.5rem",
-      fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif"
-    }}>
+      fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif",
+      position: "relative",
+      transition: "all 0.3s ease"
+    },
+    formContainer: {
+      maxWidth: "500px",
+      width: "100%",
+      background: "linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(20, 20, 20, 0.95))",
+      backdropFilter: "blur(10px)",
+      borderRadius: "24px",
+      padding: "2.5rem",
+      border: `1px solid ${theme.primary}33`,
+      boxShadow: `0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px ${theme.primary}1A`,
+      position: "relative",
+      zIndex: 2,
+      animation: "fadeInUp 0.6s ease-out"
+    },
+    input: {
+      width: "100%",
+      padding: "0.9rem 1rem",
+      background: "rgba(255, 255, 255, 0.05)",
+      border: `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: "#ffffff",
+      fontSize: "1rem",
+      transition: "all 0.3s ease",
+      outline: "none",
+      fontFamily: "inherit"
+    },
+    registerButton: {
+      width: "100%",
+      padding: "0.9rem",
+      background: theme.gradient,
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      fontSize: "1rem",
+      fontWeight: 600,
+      transition: "all 0.3s ease",
+      cursor: "pointer"
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      {/* Popup Notification */}
+      {popupMessage.show && (
+        <div style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 9999,
+          animation: "slideInRight 0.5s ease-out"
+        }}>
+          <div style={{
+            background: popupMessage.type === "success" 
+              ? "linear-gradient(135deg, #28a745, #20c997)"
+              : "linear-gradient(135deg, #dc3545, #c82333)",
+            color: "white",
+            padding: "1rem 1.5rem",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            minWidth: "300px",
+            maxWidth: "450px"
+          }}>
+            <span style={{ fontSize: "1.5rem" }}>
+              {popupMessage.type === "success" ? "✅" : "⚠️"}
+            </span>
+            <span style={{ fontSize: "0.95rem", fontWeight: 500 }}>
+              {popupMessage.message}
+            </span>
+            <button
+              onClick={() => setPopupMessage({ show: false, message: "", type: "" })}
+              style={{
+                background: "none",
+                border: "none",
+                color: "white",
+                cursor: "pointer",
+                marginLeft: "auto",
+                fontSize: "1.2rem"
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Decorative background elements */}
       <div style={{
         position: "fixed",
@@ -150,10 +261,11 @@ function Register() {
         left: "-10%",
         width: "500px",
         height: "500px",
-        background: "radial-gradient(circle, rgba(255, 94, 0, 0.1) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}14 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(80px)",
-        pointerEvents: "none"
+        pointerEvents: "none",
+        animation: "float 8s ease-in-out infinite"
       }}></div>
       <div style={{
         position: "fixed",
@@ -161,10 +273,11 @@ function Register() {
         right: "-5%",
         width: "400px",
         height: "400px",
-        background: "radial-gradient(circle, rgba(255, 140, 0, 0.08) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}0D 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(60px)",
-        pointerEvents: "none"
+        pointerEvents: "none",
+        animation: "float 10s ease-in-out infinite reverse"
       }}></div>
       <div style={{
         position: "fixed",
@@ -172,27 +285,28 @@ function Register() {
         left: "50%",
         width: "300px",
         height: "300px",
-        background: "radial-gradient(circle, rgba(255, 107, 0, 0.05) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}0A 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(50px)",
         pointerEvents: "none",
-        transform: "translate(-50%, -50%)"
+        transform: "translate(-50%, -50%)",
+        animation: "pulse 4s ease-in-out infinite"
       }}></div>
 
+      {/* Animated particles */}
+      <div className="particles">
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+      </div>
+
       {/* Register Form Container */}
-      <div style={{
-        maxWidth: "500px",
-        width: "100%",
-        background: "linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(20, 20, 20, 0.95))",
-        backdropFilter: "blur(10px)",
-        borderRadius: "24px",
-        padding: "2.5rem",
-        border: "1px solid rgba(255, 140, 0, 0.2)",
-        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 107, 0, 0.1)",
-        position: "relative",
-        zIndex: 2,
-        animation: "fadeInUp 0.6s ease-out"
-      }}>
+      <div style={styles.formContainer}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <div style={{
@@ -203,16 +317,13 @@ function Register() {
           <h2 style={{
             fontSize: "2rem",
             fontWeight: 700,
-            background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFA500)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
+            color: theme.text,
             marginBottom: "0.5rem"
           }}>
             Create Account
           </h2>
           <p style={{
-            color: "#a0a0a0",
+            color: `${theme.text}CC`,
             fontSize: "0.9rem"
           }}>
             Join PrajnaAI to start your learning journey
@@ -236,28 +347,11 @@ function Register() {
           </div>
         )}
 
-        {/* Error Message */}
-        {error && (
-          <div style={{
-            background: "rgba(220, 53, 69, 0.1)",
-            border: "1px solid rgba(220, 53, 69, 0.3)",
-            borderRadius: "12px",
-            padding: "0.75rem 1rem",
-            marginBottom: "1.5rem",
-            color: "#ff6b6b",
-            fontSize: "0.9rem",
-            textAlign: "center",
-            animation: "shake 0.5s ease-out"
-          }}>
-            ⚠️ {error}
-          </div>
-        )}
-
         {/* Name Input */}
         <div style={{ marginBottom: "1.25rem" }}>
           <label style={{
             display: "block",
-            color: "#FFA500",
+            color: theme.primary,
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: 500
@@ -270,25 +364,14 @@ function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyPress={handleKeyPress}
-            style={{
-              width: "100%",
-              padding: "0.9rem 1rem",
-              background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 140, 0, 0.3)",
-              borderRadius: "12px",
-              color: "#ffffff",
-              fontSize: "1rem",
-              transition: "all 0.3s ease",
-              outline: "none",
-              fontFamily: "inherit"
-            }}
+            style={styles.input}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#FF8C00";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+              e.currentTarget.style.borderColor = theme.primary;
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+              e.currentTarget.style.borderColor = `${theme.primary}4D`;
               e.currentTarget.style.boxShadow = "none";
               e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
             }}
@@ -300,7 +383,7 @@ function Register() {
         <div style={{ marginBottom: "1.25rem" }}>
           <label style={{
             display: "block",
-            color: "#FFA500",
+            color: theme.primary,
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: 500
@@ -313,25 +396,14 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyPress={handleKeyPress}
-            style={{
-              width: "100%",
-              padding: "0.9rem 1rem",
-              background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 140, 0, 0.3)",
-              borderRadius: "12px",
-              color: "#ffffff",
-              fontSize: "1rem",
-              transition: "all 0.3s ease",
-              outline: "none",
-              fontFamily: "inherit"
-            }}
+            style={styles.input}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#FF8C00";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+              e.currentTarget.style.borderColor = theme.primary;
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+              e.currentTarget.style.borderColor = `${theme.primary}4D`;
               e.currentTarget.style.boxShadow = "none";
               e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
             }}
@@ -343,7 +415,7 @@ function Register() {
         <div style={{ marginBottom: "1.25rem" }}>
           <label style={{
             display: "block",
-            color: "#FFA500",
+            color: theme.primary,
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: 500
@@ -358,25 +430,16 @@ function Register() {
               onChange={handlePasswordChange}
               onKeyPress={handleKeyPress}
               style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none",
-                paddingRight: "3rem",
-                fontFamily: "inherit"
+                ...styles.input,
+                paddingRight: "3rem"
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+                e.currentTarget.style.borderColor = `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
               }}
@@ -392,14 +455,14 @@ function Register() {
                 transform: "translateY(-50%)",
                 background: "none",
                 border: "none",
-                color: "#FFA500",
+                color: theme.primary,
                 cursor: "pointer",
                 fontSize: "1.1rem",
                 padding: "0.5rem",
                 transition: "color 0.3s ease"
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "#FF8C00"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "#FFA500"}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.primaryLight || theme.primary}
+              onMouseLeave={(e) => e.currentTarget.style.color = theme.primary}
             >
               {showPassword ? "👁️" : "👁️‍🗨️"}
             </button>
@@ -407,7 +470,7 @@ function Register() {
           
           {/* Password Strength Indicator */}
           {password && (
-            <div style={{ marginTop: "0.5rem" }}>
+            <div style={{ marginTop: "0.5rem", animation: "fadeInUp 0.3s ease-out" }}>
               <div style={{
                 height: "4px",
                 background: "rgba(255, 255, 255, 0.1)",
@@ -437,7 +500,7 @@ function Register() {
         <div style={{ marginBottom: "1.5rem" }}>
           <label style={{
             display: "block",
-            color: "#FFA500",
+            color: theme.primary,
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: 500
@@ -452,31 +515,21 @@ function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               onKeyPress={handleKeyPress}
               style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: `1px solid ${
-                  confirmPassword && password !== confirmPassword 
-                    ? "rgba(220, 53, 69, 0.5)" 
-                    : "rgba(255, 140, 0, 0.3)"
-                }`,
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none",
+                ...styles.input,
                 paddingRight: "3rem",
-                fontFamily: "inherit"
+                border: confirmPassword && password !== confirmPassword 
+                  ? `1px solid #dc3545` 
+                  : `1px solid ${theme.primary}4D`
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = confirmPassword && password !== confirmPassword 
-                  ? "rgba(220, 53, 69, 0.5)" 
-                  : "rgba(255, 140, 0, 0.3)";
+                  ? "#dc3545" 
+                  : `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
               }}
@@ -492,14 +545,14 @@ function Register() {
                 transform: "translateY(-50%)",
                 background: "none",
                 border: "none",
-                color: "#FFA500",
+                color: theme.primary,
                 cursor: "pointer",
                 fontSize: "1.1rem",
                 padding: "0.5rem",
                 transition: "color 0.3s ease"
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "#FF8C00"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "#FFA500"}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.primaryLight || theme.primary}
+              onMouseLeave={(e) => e.currentTarget.style.color = theme.primary}
             >
               {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
             </button>
@@ -508,7 +561,8 @@ function Register() {
             <p style={{
               color: "#ff6b6b",
               fontSize: "0.75rem",
-              marginTop: "0.25rem"
+              marginTop: "0.25rem",
+              animation: "shake 0.3s ease-out"
             }}>
               ⚠️ Passwords do not match
             </p>
@@ -520,33 +574,23 @@ function Register() {
           onClick={register}
           disabled={loading}
           style={{
-            width: "100%",
-            padding: "0.9rem",
-            background: loading 
-              ? "linear-gradient(135deg, #555, #666)"
-              : "linear-gradient(135deg, #FF6B00, #FF8C00)",
-            color: "white",
-            border: "none",
-            borderRadius: "12px",
-            fontSize: "1rem",
-            fontWeight: 600,
-            cursor: loading ? "not-allowed" : "pointer",
-            transition: "all 0.3s ease",
-            boxShadow: loading ? "none" : "0 4px 15px rgba(255, 107, 0, 0.3)",
+            ...styles.registerButton,
             opacity: loading ? 0.7 : 1,
+            cursor: loading ? "not-allowed" : "pointer",
+            boxShadow: loading ? "none" : `0 4px 15px ${theme.primary}4D`,
             position: "relative",
             overflow: "hidden"
           }}
           onMouseEnter={(e) => {
             if (!loading) {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(255, 107, 0, 0.4)";
+              e.currentTarget.style.boxShadow = `0 6px 20px ${theme.primary}4D`;
             }
           }}
           onMouseLeave={(e) => {
             if (!loading) {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 107, 0, 0.3)";
+              e.currentTarget.style.boxShadow = `0 4px 15px ${theme.primary}4D`;
             }
           }}
         >
@@ -567,24 +611,24 @@ function Register() {
           textAlign: "center",
           marginTop: "1.5rem",
           paddingTop: "1.5rem",
-          borderTop: "1px solid rgba(255, 140, 0, 0.1)"
+          borderTop: `1px solid ${theme.primary}1A`
         }}>
-          <p style={{ color: "#a0a0a0", fontSize: "0.9rem" }}>
+          <p style={{ color: `${theme.text}CC`, fontSize: "0.9rem" }}>
             Already have an account?{" "}
             <Link
               to="/login"
               style={{
-                color: "#FF8C00",
+                color: theme.primary,
                 textDecoration: "none",
                 fontWeight: 600,
                 transition: "all 0.3s ease"
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = "#FFA500";
+                e.currentTarget.style.color = theme.primaryLight || theme.primary;
                 e.currentTarget.style.textDecoration = "underline";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = "#FF8C00";
+                e.currentTarget.style.color = theme.primary;
                 e.currentTarget.style.textDecoration = "none";
               }}
             >
@@ -598,23 +642,23 @@ function Register() {
           textAlign: "center",
           marginTop: "1rem",
           padding: "0.75rem",
-          background: "rgba(255, 140, 0, 0.05)",
+          background: `${theme.primary}0D`,
           borderRadius: "8px",
-          border: "1px dashed rgba(255, 140, 0, 0.2)"
+          border: `1px dashed ${theme.primary}33`
         }}>
-          <p style={{ color: "#888", fontSize: "0.75rem", margin: 0 }}>
+          <p style={{ color: `${theme.text}99`, fontSize: "0.75rem", margin: 0 }}>
             💡 Press <kbd style={{
-              background: "rgba(255, 140, 0, 0.2)",
+              background: `${theme.primary}33`,
               padding: "0.2rem 0.4rem",
               borderRadius: "4px",
-              color: "#FFA500",
+              color: theme.primary,
               fontFamily: "monospace"
             }}>Enter</kbd> key to register quickly
           </p>
         </div>
       </div>
 
-      {/* Add CSS animations */}
+      {/* CSS Animations */}
       <style>{`
         @keyframes fadeInUp {
           from {
@@ -654,6 +698,46 @@ function Register() {
           }
         }
 
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(100px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          25% { transform: translate(20px, -20px) rotate(5deg); }
+          50% { transform: translate(-10px, 30px) rotate(-3deg); }
+          75% { transform: translate(15px, -10px) rotate(2deg); }
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes particleFloat {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.5;
+          }
+          90% {
+            opacity: 0.5;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(20px);
+            opacity: 0;
+          }
+        }
+
         .spinner {
           display: inline-block;
           width: 16px;
@@ -683,9 +767,132 @@ function Register() {
           font-size: 0.75rem;
           font-weight: 600;
           line-height: 1;
-          color: #FFA500;
-          background-color: rgba(255, 140, 0, 0.2);
           border-radius: 4px;
+        }
+
+        /* Particles Animation */
+        .particles {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .particle {
+          position: absolute;
+          bottom: -20px;
+          width: 4px;
+          height: 4px;
+          background: ${theme.primary};
+          border-radius: 50%;
+          opacity: 0;
+          animation: particleFloat 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+          left: 5%;
+          width: 6px;
+          height: 6px;
+          animation-duration: 12s;
+          animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+          left: 15%;
+          width: 3px;
+          height: 3px;
+          animation-duration: 10s;
+          animation-delay: 2s;
+        }
+
+        .particle:nth-child(3) {
+          left: 25%;
+          width: 5px;
+          height: 5px;
+          animation-duration: 14s;
+          animation-delay: 1s;
+        }
+
+        .particle:nth-child(4) {
+          left: 40%;
+          width: 4px;
+          height: 4px;
+          animation-duration: 9s;
+          animation-delay: 3s;
+        }
+
+        .particle:nth-child(5) {
+          left: 55%;
+          width: 7px;
+          height: 7px;
+          animation-duration: 11s;
+          animation-delay: 0.5s;
+        }
+
+        .particle:nth-child(6) {
+          left: 70%;
+          width: 3px;
+          height: 3px;
+          animation-duration: 13s;
+          animation-delay: 1.5s;
+        }
+
+        .particle:nth-child(7) {
+          left: 85%;
+          width: 5px;
+          height: 5px;
+          animation-duration: 15s;
+          animation-delay: 2.5s;
+        }
+
+        .particle:nth-child(8) {
+          left: 95%;
+          width: 4px;
+          height: 4px;
+          animation-duration: 11s;
+          animation-delay: 3.5s;
+        }
+
+        /* Form input focus ring animation */
+        input:focus {
+          animation: glowPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 ${theme.primary}1A;
+          }
+          50% {
+            box-shadow: 0 0 0 4px ${theme.primary}1A;
+          }
+        }
+
+        /* Button ripple effect */
+        button {
+          position: relative;
+          overflow: hidden;
+        }
+
+        button::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: translate(-50%, -50%);
+          transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::after {
+          width: 300px;
+          height: 300px;
         }
       `}</style>
     </div>

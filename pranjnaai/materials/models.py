@@ -7,7 +7,7 @@ class Material(models.Model):
     uploaded_file = models.FileField(upload_to="materials/")
     structured_content = models.TextField()
     file_type = models.CharField(max_length=10)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # 🔥 track owner
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='materials', null=True, blank=True)  # 🔥 track owner
 
     def __str__(self):
         return self.title

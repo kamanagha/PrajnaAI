@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import { useTheme } from "../context/ThemeContext";
 
 function UploadMaterial() {
+  const navigate = useNavigate();
+  const { currentTheme, themes } = useTheme();
+  const theme = themes[currentTheme];
+  
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
@@ -19,7 +24,6 @@ function UploadMaterial() {
   const [preview, setPreview] = useState(null);
   
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
 
   // Auto-hide popup after 3 seconds
   useEffect(() => {
@@ -241,14 +245,90 @@ function UploadMaterial() {
     }
   };
 
-  return (
-    <div style={{
+  // Dynamic styles based on theme
+  const styles = {
+    container: {
       minHeight: "calc(100vh - 80px)",
-      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%)",
+      background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.surface} 50%, ${theme.background} 100%)`,
       padding: "2rem 1.5rem",
       fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif",
-      position: "relative"
-    }}>
+      position: "relative",
+      transition: "all 0.3s ease"
+    },
+    formCard: {
+      background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
+      borderRadius: "20px",
+      padding: "2rem",
+      border: `1px solid ${theme.primary}33`,
+      boxShadow: `0 20px 40px rgba(0,0,0,0.3)`,
+      transition: "all 0.3s ease"
+    },
+    label: {
+      display: "block",
+      color: theme.primary,
+      marginBottom: "0.5rem",
+      fontSize: "0.9rem",
+      fontWeight: 500
+    },
+    input: (hasError) => ({
+      width: "100%",
+      padding: "0.9rem 1rem",
+      background: "rgba(255, 255, 255, 0.05)",
+      border: hasError ? "1px solid #dc3545" : `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: "#ffffff",
+      fontSize: "1rem",
+      transition: "all 0.3s ease",
+      outline: "none"
+    }),
+    textarea: {
+      width: "100%",
+      padding: "0.9rem 1rem",
+      background: "rgba(255, 255, 255, 0.05)",
+      border: `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: "#ffffff",
+      fontSize: "1rem",
+      transition: "all 0.3s ease",
+      outline: "none",
+      resize: "vertical",
+      fontFamily: "inherit"
+    },
+    dropzone: (isDragActive) => ({
+      border: isDragActive ? `2px dashed ${theme.primary}` : `2px dashed ${theme.primary}4D`,
+      borderRadius: "12px",
+      padding: "2rem",
+      textAlign: "center",
+      background: isDragActive ? `${theme.primary}1A` : "rgba(255, 255, 255, 0.02)",
+      transition: "all 0.3s ease",
+      cursor: "pointer"
+    }),
+    uploadButton: {
+      flex: 2,
+      padding: "0.9rem",
+      background: theme.gradient,
+      color: "white",
+      border: "none",
+      borderRadius: "12px",
+      fontSize: "1rem",
+      fontWeight: 600,
+      transition: "all 0.3s ease",
+      cursor: "pointer"
+    },
+    clearButton: {
+      flex: 1,
+      padding: "0.9rem",
+      background: "rgba(108, 117, 125, 0.2)",
+      border: `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: theme.text,
+      transition: "all 0.3s ease",
+      cursor: "pointer"
+    }
+  };
+
+  return (
+    <div style={styles.container}>
       {/* Popup Notification */}
       {popupMessage.show && (
         <div style={{
@@ -302,7 +382,7 @@ function UploadMaterial() {
         left: "-10%",
         width: "500px",
         height: "500px",
-        background: "radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}14 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(80px)",
         pointerEvents: "none"
@@ -313,7 +393,7 @@ function UploadMaterial() {
         right: "-5%",
         width: "400px",
         height: "400px",
-        background: "radial-gradient(circle, rgba(255, 140, 0, 0.06) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}0D 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(80px)",
         pointerEvents: "none"
@@ -338,16 +418,13 @@ function UploadMaterial() {
           <h1 style={{
             fontSize: "2rem",
             fontWeight: 800,
-            background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFA500)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
+            color: theme.text,
             marginBottom: "0.5rem"
           }}>
             Upload Study Material
           </h1>
           <p style={{
-            color: "#a0a0a0",
+            color: `${theme.text}CC`,
             fontSize: "0.95rem"
           }}>
             Share your knowledge by uploading study resources
@@ -355,22 +432,10 @@ function UploadMaterial() {
         </div>
 
         {/* Upload Form */}
-        <div style={{
-          background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-          borderRadius: "20px",
-          padding: "2rem",
-          border: "1px solid rgba(255, 140, 0, 0.2)",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
-        }}>
+        <div style={styles.formCard}>
           {/* Title Input */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              color: "#FFA500",
-              marginBottom: "0.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 500
-            }}>
+            <label style={styles.label}>
               Title <span style={{ color: "#dc3545" }}>*</span>
             </label>
             <input
@@ -378,23 +443,13 @@ function UploadMaterial() {
               placeholder="Enter material title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: titleError ? "1px solid #dc3545" : "1px solid rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none"
-              }}
+              style={styles.input(!!titleError)}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = titleError ? "#dc3545" : "rgba(255, 140, 0, 0.3)";
+                e.currentTarget.style.borderColor = titleError ? "#dc3545" : `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
@@ -407,13 +462,7 @@ function UploadMaterial() {
 
           {/* Subject Input */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              color: "#FFA500",
-              marginBottom: "0.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 500
-            }}>
+            <label style={styles.label}>
               Subject <span style={{ color: "#dc3545" }}>*</span>
             </label>
             <input
@@ -421,23 +470,13 @@ function UploadMaterial() {
               placeholder="e.g., Mathematics, Physics, History"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: subjectError ? "1px solid #dc3545" : "1px solid rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none"
-              }}
+              style={styles.input(!!subjectError)}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = subjectError ? "#dc3545" : "rgba(255, 140, 0, 0.3)";
+                e.currentTarget.style.borderColor = subjectError ? "#dc3545" : `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
@@ -450,13 +489,7 @@ function UploadMaterial() {
 
           {/* Description Input (Optional) */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              color: "#FFA500",
-              marginBottom: "0.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 500
-            }}>
+            <label style={styles.label}>
               Description (Optional)
             </label>
             <textarea
@@ -464,25 +497,13 @@ function UploadMaterial() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows="3"
-              style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none",
-                resize: "vertical",
-                fontFamily: "inherit"
-              }}
+              style={styles.textarea}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+                e.currentTarget.style.borderColor = `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
@@ -490,13 +511,7 @@ function UploadMaterial() {
 
           {/* Tags Input (Optional) */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              color: "#FFA500",
-              marginBottom: "0.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 500
-            }}>
+            <label style={styles.label}>
               Tags (Optional)
             </label>
             <input
@@ -504,40 +519,24 @@ function UploadMaterial() {
               placeholder="e.g., notes, exam-prep, chapter-1 (comma separated)"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "0.9rem 1rem",
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                color: "#ffffff",
-                fontSize: "1rem",
-                transition: "all 0.3s ease",
-                outline: "none"
-              }}
+              style={styles.input(false)}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#FF8C00";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                e.currentTarget.style.borderColor = theme.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+                e.currentTarget.style.borderColor = `${theme.primary}4D`;
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
-            <p style={{ color: "#666", fontSize: "0.7rem", marginTop: "0.25rem" }}>
+            <p style={{ color: `${theme.text}99`, fontSize: "0.7rem", marginTop: "0.25rem" }}>
               💡 Add tags to make your material easier to find
             </p>
           </div>
 
           {/* File Upload Area */}
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              color: "#FFA500",
-              marginBottom: "0.5rem",
-              fontSize: "0.9rem",
-              fontWeight: 500
-            }}>
+            <label style={styles.label}>
               File <span style={{ color: "#dc3545" }}>*</span>
             </label>
             <div
@@ -545,15 +544,7 @@ function UploadMaterial() {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              style={{
-                border: dragActive ? "2px dashed #FF8C00" : "2px dashed rgba(255, 140, 0, 0.3)",
-                borderRadius: "12px",
-                padding: "2rem",
-                textAlign: "center",
-                background: dragActive ? "rgba(255, 140, 0, 0.1)" : "rgba(255, 255, 255, 0.02)",
-                transition: "all 0.3s ease",
-                cursor: "pointer"
-              }}
+              style={styles.dropzone(dragActive)}
               onClick={() => fileInputRef.current.click()}
             >
               <input
@@ -567,21 +558,21 @@ function UploadMaterial() {
               {!file ? (
                 <>
                   <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>📁</div>
-                  <p style={{ color: "#FFA500", marginBottom: "0.5rem" }}>
+                  <p style={{ color: theme.primary, marginBottom: "0.5rem" }}>
                     Drag & drop your file here or click to browse
                   </p>
-                  <p style={{ color: "#666", fontSize: "0.8rem" }}>
+                  <p style={{ color: `${theme.text}99`, fontSize: "0.8rem" }}>
                     Supported formats: PDF, DOC, DOCX, TXT, PPT, PPTX, JPG, PNG (Max 50MB)
                   </p>
                 </>
               ) : (
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem", justifyContent: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
                   <div style={{ fontSize: "2rem" }}>{selectedFileType}</div>
                   <div style={{ textAlign: "left" }}>
                     <p style={{ color: "#ffffff", fontWeight: 500, marginBottom: "0.25rem" }}>
                       {file.name}
                     </p>
-                    <p style={{ color: "#666", fontSize: "0.8rem" }}>
+                    <p style={{ color: `${theme.text}99`, fontSize: "0.8rem" }}>
                       {getFileTypeName(file.type)} • {formatFileSize(file.size)}
                     </p>
                   </div>
@@ -614,7 +605,7 @@ function UploadMaterial() {
                   maxWidth: "200px",
                   maxHeight: "200px",
                   borderRadius: "8px",
-                  border: "1px solid rgba(255, 140, 0, 0.3)"
+                  border: `1px solid ${theme.primary}4D`
                 }} />
               </div>
             )}
@@ -634,8 +625,8 @@ function UploadMaterial() {
                 justifyContent: "space-between",
                 marginBottom: "0.5rem"
               }}>
-                <span style={{ color: "#FFA500", fontSize: "0.85rem" }}>Uploading...</span>
-                <span style={{ color: "#FFA500", fontSize: "0.85rem" }}>{uploadProgress}%</span>
+                <span style={{ color: theme.primary, fontSize: "0.85rem" }}>Uploading...</span>
+                <span style={{ color: theme.primary, fontSize: "0.85rem" }}>{uploadProgress}%</span>
               </div>
               <div style={{
                 width: "100%",
@@ -647,7 +638,7 @@ function UploadMaterial() {
                 <div style={{
                   width: `${uploadProgress}%`,
                   height: "100%",
-                  background: "linear-gradient(90deg, #FF6B00, #FF8C00)",
+                  background: theme.gradient,
                   transition: "width 0.3s ease",
                   borderRadius: "4px"
                 }}></div>
@@ -661,31 +652,20 @@ function UploadMaterial() {
               onClick={upload}
               disabled={loading}
               style={{
-                flex: 2,
-                padding: "0.9rem",
-                background: loading 
-                  ? "linear-gradient(135deg, #555, #666)"
-                  : "linear-gradient(135deg, #FF6B00, #FF8C00)",
-                color: "white",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease",
-                boxShadow: loading ? "none" : "0 4px 15px rgba(255, 107, 0, 0.3)",
-                opacity: loading ? 0.7 : 1
+                ...styles.uploadButton,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
                   e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(255, 107, 0, 0.4)";
+                  e.currentTarget.style.boxShadow = `0 6px 20px ${theme.primary}4D`;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 107, 0, 0.3)";
+                  e.currentTarget.style.boxShadow = "none";
                 }
               }}
             >
@@ -696,18 +676,13 @@ function UploadMaterial() {
               onClick={clearForm}
               disabled={loading}
               style={{
-                flex: 1,
-                padding: "0.9rem",
-                background: "rgba(108, 117, 125, 0.2)",
-                border: "1px solid #6c757d",
-                borderRadius: "12px",
-                color: "#a0a0a0",
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease"
+                ...styles.clearButton,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer"
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.background = "rgba(108, 117, 125, 0.3)";
+                  e.currentTarget.style.background = `${theme.primary}1A`;
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }
               }}
@@ -729,10 +704,10 @@ function UploadMaterial() {
           background: "rgba(0, 0, 0, 0.3)",
           borderRadius: "12px",
           padding: "1rem",
-          border: "1px solid rgba(255, 140, 0, 0.1)"
+          border: `1px solid ${theme.primary}1A`
         }}>
           <h4 style={{
-            color: "#FFA500",
+            color: theme.primary,
             fontSize: "0.9rem",
             marginBottom: "0.5rem",
             display: "flex",
@@ -741,7 +716,7 @@ function UploadMaterial() {
           }}>
             💡 Pro Tips
           </h4>
-          <ul style={{ color: "#a0a0a0", fontSize: "0.8rem", margin: 0, paddingLeft: "1.2rem" }}>
+          <ul style={{ color: `${theme.text}CC`, fontSize: "0.8rem", margin: 0, paddingLeft: "1.2rem" }}>
             <li>Use clear and descriptive titles for better organization</li>
             <li>Add relevant tags to help others discover your content</li>
             <li>Supported files: PDF, DOC, DOCX, TXT, PPT, PPTX, Images (Max 50MB)</li>

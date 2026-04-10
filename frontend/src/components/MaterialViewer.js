@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 function MaterialViewer() {
+  const { currentTheme, themes } = useTheme();
+  const theme = themes[currentTheme];
+  
   const [materials, setMaterials] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
@@ -67,7 +71,7 @@ function MaterialViewer() {
       case "DOC": return "#4285F4";
       case "PPT": return "#FF9800";
       case "EXCEL": return "#4CAF50";
-      default: return "#9C27B0";
+      default: return theme.primary;
     }
   };
 
@@ -127,13 +131,130 @@ function MaterialViewer() {
 
   const stats = getStatistics();
 
-  return (
-    <div style={{
+  // Dynamic styles based on theme
+  const styles = {
+    container: {
       minHeight: "calc(100vh - 80px)",
-      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%)",
+      background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.surface} 50%, ${theme.background} 100%)`,
       padding: "2rem 1.5rem",
-      fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif"
-    }}>
+      fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif",
+      transition: "all 0.3s ease"
+    },
+    gradientText: {
+      background: theme.gradient,
+      backgroundClip: "text",
+      WebkitBackgroundClip: "text",
+      color: "transparent"
+    },
+    statCard: (borderColor) => ({
+      background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
+      borderRadius: "16px",
+      padding: "1rem",
+      textAlign: "center",
+      border: `1px solid ${borderColor}`,
+      transition: "all 0.3s ease"
+    }),
+    filtersContainer: {
+      background: "rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(10px)",
+      borderRadius: "20px",
+      padding: "1.5rem",
+      marginBottom: "2rem",
+      border: `1px solid ${theme.primary}33`,
+      transition: "all 0.3s ease"
+    },
+    label: {
+      display: "block",
+      color: theme.primary,
+      marginBottom: "0.5rem",
+      fontSize: "0.85rem",
+      fontWeight: 500
+    },
+    input: {
+      width: "100%",
+      padding: "0.7rem 1rem",
+      background: "rgba(255, 255, 255, 0.05)",
+      border: `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: "#ffffff",
+      fontSize: "0.9rem",
+      transition: "all 0.3s ease",
+      outline: "none"
+    },
+    select: {
+      width: "100%",
+      padding: "0.7rem 1rem",
+      background: "rgba(255, 255, 255, 0.05)",
+      border: `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: "#ffffff",
+      fontSize: "0.9rem",
+      cursor: "pointer",
+      outline: "none"
+    },
+    viewButton: (isActive) => ({
+      flex: 1,
+      padding: "0.7rem",
+      background: isActive 
+        ? theme.gradient
+        : "rgba(255, 255, 255, 0.05)",
+      border: isActive 
+        ? "none"
+        : `1px solid ${theme.primary}4D`,
+      borderRadius: "12px",
+      color: isActive ? "white" : theme.primary,
+      cursor: "pointer",
+      transition: "all 0.3s ease"
+    }),
+    clearButton: {
+      marginTop: "1rem",
+      padding: "0.5rem 1rem",
+      background: `${theme.primary}33`,
+      border: `1px solid ${theme.primary}`,
+      borderRadius: "10px",
+      color: theme.primary,
+      cursor: "pointer",
+      fontSize: "0.85rem",
+      transition: "all 0.3s ease"
+    },
+    materialCard: {
+      cursor: "pointer",
+      background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
+      borderRadius: "16px",
+      border: `1px solid ${theme.primary}33`,
+      transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
+    },
+    cardHover: {
+      transform: "translateY(-5px)",
+      borderColor: `${theme.primary}80`,
+      boxShadow: `0 10px 30px ${theme.primary}33`
+    },
+    typeBadge: (color) => ({
+      background: `rgba(${parseInt(color.slice(1,3), 16)}, ${parseInt(color.slice(3,5), 16)}, ${parseInt(color.slice(5,7), 16)}, 0.2)`,
+      color: color,
+      padding: "0.25rem 0.75rem",
+      borderRadius: "20px",
+      fontSize: "0.75rem",
+      fontWeight: 600
+    }),
+    emptyState: {
+      textAlign: "center",
+      padding: "4rem",
+      background: "rgba(0,0,0,0.3)",
+      borderRadius: "20px"
+    },
+    errorState: {
+      background: "rgba(220, 53, 69, 0.1)",
+      border: "1px solid rgba(220, 53, 69, 0.3)",
+      borderRadius: "12px",
+      padding: "1rem",
+      textAlign: "center",
+      color: "#ff6b6b"
+    }
+  };
+
+  return (
+    <div style={styles.container}>
       {/* Decorative background */}
       <div style={{
         position: "fixed",
@@ -141,7 +262,7 @@ function MaterialViewer() {
         right: "-10%",
         width: "500px",
         height: "500px",
-        background: "radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%)",
+        background: `radial-gradient(circle, ${theme.primary}14 0%, transparent 70%)`,
         borderRadius: "50%",
         filter: "blur(80px)",
         pointerEvents: "none"
@@ -161,16 +282,14 @@ function MaterialViewer() {
           <h1 style={{
             fontSize: "2.5rem",
             fontWeight: 800,
-            background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFA500)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
+            ...styles.gradientText,
             marginBottom: "0.5rem"
           }}>
             📚 Study Materials Library
           </h1>
           <p style={{
-            color: "#a0a0a0",
+            color: theme.text,
+            opacity: 0.8,
             fontSize: "1rem"
           }}>
             Explore, search, and access your learning resources
@@ -184,61 +303,30 @@ function MaterialViewer() {
           gap: "1rem",
           marginBottom: "2rem"
         }}>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "16px",
-            padding: "1rem",
-            textAlign: "center",
-            border: "1px solid rgba(255, 140, 0, 0.2)"
-          }}>
+          <div style={styles.statCard(`${theme.primary}33`)}>
             <div style={{ fontSize: "2rem" }}>📚</div>
-            <div style={{ color: "#FFA500", fontSize: "1.5rem", fontWeight: 700 }}>{stats.total}</div>
-            <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>Total Materials</div>
+            <div style={{ color: theme.primary, fontSize: "1.5rem", fontWeight: 700 }}>{stats.total}</div>
+            <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>Total Materials</div>
           </div>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "16px",
-            padding: "1rem",
-            textAlign: "center",
-            border: "1px solid rgba(255, 68, 68, 0.2)"
-          }}>
+          <div style={styles.statCard("#FF444433")}>
             <div style={{ fontSize: "2rem" }}>📄</div>
             <div style={{ color: "#FF4444", fontSize: "1.5rem", fontWeight: 700 }}>{stats.pdfs}</div>
-            <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>PDF Documents</div>
+            <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>PDF Documents</div>
           </div>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "16px",
-            padding: "1rem",
-            textAlign: "center",
-            border: "1px solid rgba(66, 133, 244, 0.2)"
-          }}>
+          <div style={styles.statCard("#4285F433")}>
             <div style={{ fontSize: "2rem" }}>📝</div>
             <div style={{ color: "#4285F4", fontSize: "1.5rem", fontWeight: 700 }}>{stats.docs}</div>
-            <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>Documents</div>
+            <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>Documents</div>
           </div>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "16px",
-            padding: "1rem",
-            textAlign: "center",
-            border: "1px solid rgba(156, 39, 176, 0.2)"
-          }}>
+          <div style={styles.statCard(`${theme.secondary}33`)}>
             <div style={{ fontSize: "2rem" }}>📘</div>
-            <div style={{ color: "#9C27B0", fontSize: "1.5rem", fontWeight: 700 }}>{stats.notes}</div>
-            <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>Notes</div>
+            <div style={{ color: theme.secondary, fontSize: "1.5rem", fontWeight: 700 }}>{stats.notes}</div>
+            <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>Notes</div>
           </div>
         </div>
 
         {/* Filters Section */}
-        <div style={{
-          background: "rgba(0, 0, 0, 0.5)",
-          backdropFilter: "blur(10px)",
-          borderRadius: "20px",
-          padding: "1.5rem",
-          marginBottom: "2rem",
-          border: "1px solid rgba(255, 140, 0, 0.2)"
-        }}>
+        <div style={styles.filtersContainer}>
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -247,13 +335,7 @@ function MaterialViewer() {
           }}>
             {/* Search Input */}
             <div>
-              <label style={{
-                display: "block",
-                color: "#FFA500",
-                marginBottom: "0.5rem",
-                fontSize: "0.85rem",
-                fontWeight: 500
-              }}>
+              <label style={styles.label}>
                 🔍 Search Materials
               </label>
               <input
@@ -261,23 +343,13 @@ function MaterialViewer() {
                 placeholder="Search by title, subject..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "0.7rem 1rem",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 140, 0, 0.3)",
-                  borderRadius: "12px",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
-                  transition: "all 0.3s ease",
-                  outline: "none"
-                }}
+                style={styles.input}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = "#FF8C00";
-                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255, 140, 0, 0.1)";
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
                 }}
                 onBlur={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.3)";
+                  e.currentTarget.style.borderColor = `${theme.primary}4D`;
                   e.currentTarget.style.boxShadow = "none";
                 }}
               />
@@ -285,29 +357,13 @@ function MaterialViewer() {
 
             {/* File Type Filter */}
             <div>
-              <label style={{
-                display: "block",
-                color: "#FFA500",
-                marginBottom: "0.5rem",
-                fontSize: "0.85rem",
-                fontWeight: 500
-              }}>
+              <label style={styles.label}>
                 📂 File Type
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "0.7rem 1rem",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 140, 0, 0.3)",
-                  borderRadius: "12px",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                  outline: "none"
-                }}
+                style={styles.select}
               >
                 <option value="all">All Types</option>
                 <option value="pdf">PDF</option>
@@ -319,29 +375,13 @@ function MaterialViewer() {
             {/* Subject Filter */}
             {subjects.length > 0 && (
               <div>
-                <label style={{
-                  display: "block",
-                  color: "#FFA500",
-                  marginBottom: "0.5rem",
-                  fontSize: "0.85rem",
-                  fontWeight: 500
-                }}>
+                <label style={styles.label}>
                   📚 Subject
                 </label>
                 <select
                   value={selectedSubject}
                   onChange={(e) => setSelectedSubject(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "0.7rem 1rem",
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 140, 0, 0.3)",
-                    borderRadius: "12px",
-                    color: "#ffffff",
-                    fontSize: "0.9rem",
-                    cursor: "pointer",
-                    outline: "none"
-                  }}
+                  style={styles.select}
                 >
                   <option value="all">All Subjects</option>
                   {subjects.map(subject => (
@@ -353,29 +393,13 @@ function MaterialViewer() {
 
             {/* Sort By */}
             <div>
-              <label style={{
-                display: "block",
-                color: "#FFA500",
-                marginBottom: "0.5rem",
-                fontSize: "0.85rem",
-                fontWeight: 500
-              }}>
+              <label style={styles.label}>
                 🔄 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "0.7rem 1rem",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 140, 0, 0.3)",
-                  borderRadius: "12px",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                  outline: "none"
-                }}
+                style={styles.select}
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -386,13 +410,7 @@ function MaterialViewer() {
 
             {/* View Mode Toggle */}
             <div>
-              <label style={{
-                display: "block",
-                color: "#FFA500",
-                marginBottom: "0.5rem",
-                fontSize: "0.85rem",
-                fontWeight: 500
-              }}>
+              <label style={styles.label}>
                 👁️ View Mode
               </label>
               <div style={{
@@ -401,39 +419,13 @@ function MaterialViewer() {
               }}>
                 <button
                   onClick={() => setViewMode("grid")}
-                  style={{
-                    flex: 1,
-                    padding: "0.7rem",
-                    background: viewMode === "grid" 
-                      ? "linear-gradient(135deg, #FF6B00, #FF8C00)"
-                      : "rgba(255, 255, 255, 0.05)",
-                    border: viewMode === "grid" 
-                      ? "none"
-                      : "1px solid rgba(255, 140, 0, 0.3)",
-                    borderRadius: "12px",
-                    color: viewMode === "grid" ? "white" : "#FFA500",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease"
-                  }}
+                  style={styles.viewButton(viewMode === "grid")}
                 >
                   📱 Grid
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  style={{
-                    flex: 1,
-                    padding: "0.7rem",
-                    background: viewMode === "list" 
-                      ? "linear-gradient(135deg, #FF6B00, #FF8C00)"
-                      : "rgba(255, 255, 255, 0.05)",
-                    border: viewMode === "list" 
-                      ? "none"
-                      : "1px solid rgba(255, 140, 0, 0.3)",
-                    borderRadius: "12px",
-                    color: viewMode === "list" ? "white" : "#FFA500",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease"
-                  }}
+                  style={styles.viewButton(viewMode === "list")}
                 >
                   📋 List
                 </button>
@@ -445,22 +437,12 @@ function MaterialViewer() {
           {(search || type !== "all" || selectedSubject !== "all" || sortBy !== "newest") && (
             <button
               onClick={clearFilters}
-              style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1rem",
-                background: "rgba(255, 107, 0, 0.2)",
-                border: "1px solid #FF6B00",
-                borderRadius: "10px",
-                color: "#FFA500",
-                cursor: "pointer",
-                fontSize: "0.85rem",
-                transition: "all 0.3s ease"
-              }}
+              style={styles.clearButton}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 107, 0, 0.3)";
+                e.currentTarget.style.background = `${theme.primary}4D`;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 107, 0, 0.2)";
+                e.currentTarget.style.background = `${theme.primary}33`;
               }}
             >
               🗑️ Clear All Filters
@@ -477,11 +459,11 @@ function MaterialViewer() {
           flexWrap: "wrap",
           gap: "1rem"
         }}>
-          <p style={{ color: "#a0a0a0", fontSize: "0.9rem" }}>
+          <p style={{ color: theme.text, opacity: 0.7, fontSize: "0.9rem" }}>
             Showing {filtered.length} of {materials.length} materials
           </p>
           {filtered.length === 0 && materials.length > 0 && (
-            <p style={{ color: "#FFA500", fontSize: "0.9rem" }}>
+            <p style={{ color: theme.primary, fontSize: "0.9rem" }}>
               No results found. Try adjusting your filters.
             </p>
           )}
@@ -495,21 +477,14 @@ function MaterialViewer() {
             alignItems: "center",
             padding: "4rem"
           }}>
-            <div className="spinner"></div>
-            <p style={{ color: "#FFA500", marginLeft: "1rem" }}>Loading materials...</p>
+            <div className="spinner" style={{ borderTopColor: theme.primary }}></div>
+            <p style={{ color: theme.primary, marginLeft: "1rem" }}>Loading materials...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div style={{
-            background: "rgba(220, 53, 69, 0.1)",
-            border: "1px solid rgba(220, 53, 69, 0.3)",
-            borderRadius: "12px",
-            padding: "1rem",
-            textAlign: "center",
-            color: "#ff6b6b"
-          }}>
+          <div style={styles.errorState}>
             ⚠️ {error}
           </div>
         )}
@@ -527,24 +502,20 @@ function MaterialViewer() {
                 key={m.id}
                 onClick={() => navigate(`/material/${m.id}`)}
                 style={{
-                  cursor: "pointer",
-                  background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-                  borderRadius: "16px",
+                  ...styles.materialCard,
                   padding: viewMode === "grid" ? "1.5rem" : "1rem",
-                  border: "1px solid rgba(255, 140, 0, 0.2)",
-                  transition: "all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
                   display: viewMode === "list" ? "flex" : "block",
                   alignItems: viewMode === "list" ? "center" : "stretch",
                   gap: viewMode === "list" ? "1rem" : "0"
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-5px)";
-                  e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.5)";
-                  e.currentTarget.style.boxShadow = "0 10px 30px rgba(255, 107, 0, 0.2)";
+                  e.currentTarget.style.borderColor = `${theme.primary}80`;
+                  e.currentTarget.style.boxShadow = `0 10px 30px ${theme.primary}33`;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor = "rgba(255, 140, 0, 0.2)";
+                  e.currentTarget.style.borderColor = `${theme.primary}33`;
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
@@ -571,7 +542,7 @@ function MaterialViewer() {
                   
                   {m.subject && (
                     <p style={{
-                      color: "#FFA500",
+                      color: theme.primary,
                       fontSize: "0.85rem",
                       marginBottom: "0.5rem"
                     }}>
@@ -581,7 +552,8 @@ function MaterialViewer() {
                   
                   {m.description && (
                     <p style={{
-                      color: "#a0a0a0",
+                      color: theme.text,
+                      opacity: 0.7,
                       fontSize: "0.85rem",
                       marginBottom: "0.5rem",
                       display: "-webkit-box",
@@ -600,20 +572,14 @@ function MaterialViewer() {
                     marginTop: "0.5rem",
                     flexWrap: "wrap"
                   }}>
-                    <span style={{
-                      background: `rgba(${parseInt(getTypeColor(getType(m)).slice(1,3), 16)}, ${parseInt(getTypeColor(getType(m)).slice(3,5), 16)}, ${parseInt(getTypeColor(getType(m)).slice(5,7), 16)}, 0.2)`,
-                      color: getTypeColor(getType(m)),
-                      padding: "0.25rem 0.75rem",
-                      borderRadius: "20px",
-                      fontSize: "0.75rem",
-                      fontWeight: 600
-                    }}>
+                    <span style={styles.typeBadge(getTypeColor(getType(m)))}>
                       {getType(m)}
                     </span>
                     
                     {m.created_at && (
                       <span style={{
-                        color: "#666",
+                        color: theme.text,
+                        opacity: 0.5,
                         fontSize: "0.7rem",
                         display: "flex",
                         alignItems: "center",
@@ -631,15 +597,10 @@ function MaterialViewer() {
 
         {/* Empty State */}
         {!loading && !error && filtered.length === 0 && materials.length === 0 && (
-          <div style={{
-            textAlign: "center",
-            padding: "4rem",
-            background: "rgba(0,0,0,0.3)",
-            borderRadius: "20px"
-          }}>
+          <div style={styles.emptyState}>
             <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📚</div>
-            <h3 style={{ color: "#FFA500", marginBottom: "0.5rem" }}>No Materials Found</h3>
-            <p style={{ color: "#a0a0a0" }}>There are no study materials available at the moment.</p>
+            <h3 style={{ color: theme.primary, marginBottom: "0.5rem" }}>No Materials Found</h3>
+            <p style={{ color: theme.text, opacity: 0.7 }}>There are no study materials available at the moment.</p>
           </div>
         )}
       </div>
@@ -655,8 +616,8 @@ function MaterialViewer() {
           display: inline-block;
           width: 30px;
           height: 30px;
-          border: 3px solid rgba(255, 140, 0, 0.3);
-          border-top: 3px solid #FF8C00;
+          border: 3px solid ${theme.primary}4D;
+          border-top: 3px solid ${theme.primary};
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
@@ -668,6 +629,14 @@ function MaterialViewer() {
         
         .material-card {
           animation: fadeIn 0.5s ease-out;
+        }
+        
+        input, select, button {
+          transition: all 0.3s ease;
+        }
+        
+        input:hover, select:hover {
+          border-color: ${theme.primary} !important;
         }
       `}</style>
     </div>

@@ -1,9 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import { useTheme } from "../context/ThemeContext";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { currentTheme, themes } = useTheme();
+  const theme = themes[currentTheme];
+  
   const [name, setName] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [stats, setStats] = useState({
@@ -92,16 +96,16 @@ function Dashboard() {
     localStorage.setItem("sidebarOpen", newState);
   };
 
-  // Quick actions data with icons, titles, descriptions, and links
+  // Quick actions data with working links
   const quickActions = [
     { 
       icon: "📤", 
       title: "Upload Materials", 
       description: "Import notes, PDFs, and resources", 
       link: "/upload", 
-      color: "#FF6B00", 
-      bgColor: "rgba(255, 107, 0, 0.1)",
-      category: "Content Management"
+      color: theme.primary, 
+      comingSoon: false,
+      category: "📁 Content Management"
     },
     { 
       icon: "📂", 
@@ -109,8 +113,8 @@ function Dashboard() {
       description: "Access and explore study content", 
       link: "/materials", 
       color: "#28a745", 
-      bgColor: "rgba(40, 167, 69, 0.1)",
-      category: "Content Management"
+      comingSoon: false,
+      category: "📁 Content Management"
     },
     { 
       icon: "🔍", 
@@ -118,28 +122,44 @@ function Dashboard() {
       description: "Find specific study resources", 
       link: "/materials", 
       color: "#17a2b8", 
-      bgColor: "rgba(23, 162, 184, 0.1)",
-      category: "Content Management"
+      comingSoon: false,
+      category: "📁 Content Management"
     },
     { 
       icon: "📊", 
-      title: "Analytics", 
+      title: "Analytics Dashboard", 
       description: "Track your learning progress", 
-      link: "#", 
+      link: "/analytics", 
       color: "#6f42c1", 
-      bgColor: "rgba(111, 66, 193, 0.1)", 
-      comingSoon: true,
-      category: "Insights"
+      comingSoon: false,
+      category: "📈 Insights & Analytics"
+    },
+    { 
+      icon: "📈", 
+      title: "Progress Report", 
+      description: "View detailed analytics", 
+      link: "/analytics", 
+      color: "#00b894", 
+      comingSoon: false,
+      category: "📈 Insights & Analytics"
     },
     { 
       icon: "👥", 
       title: "Study Groups", 
       description: "Collaborate with peers", 
-      link: "#", 
+      link: "/study-groups", 
       color: "#fd7e14", 
-      bgColor: "rgba(253, 126, 20, 0.1)", 
-      comingSoon: true,
-      category: "Collaboration"
+      comingSoon: false,
+      category: "🤝 Collaboration"
+    },
+    { 
+      icon: "💬", 
+      title: "Discussion Forum", 
+      description: "Ask questions and share knowledge", 
+      link: "/study-groups", 
+      color: "#4a90e2", 
+      comingSoon: false,
+      category: "🤝 Collaboration"
     },
     { 
       icon: "🎯", 
@@ -147,9 +167,8 @@ function Dashboard() {
       description: "Set learning milestones", 
       link: "#", 
       color: "#20c997", 
-      bgColor: "rgba(32, 201, 151, 0.1)", 
       comingSoon: true,
-      category: "Productivity"
+      category: "🎯 Productivity"
     },
     { 
       icon: "📅", 
@@ -157,9 +176,8 @@ function Dashboard() {
       description: "Schedule your study sessions", 
       link: "#", 
       color: "#e83e8c", 
-      bgColor: "rgba(232, 62, 140, 0.1)", 
       comingSoon: true,
-      category: "Productivity"
+      category: "🎯 Productivity"
     },
     { 
       icon: "🏆", 
@@ -167,19 +185,8 @@ function Dashboard() {
       description: "Earn badges and rewards", 
       link: "#", 
       color: "#ffc107", 
-      bgColor: "rgba(255, 193, 7, 0.1)", 
       comingSoon: true,
-      category: "Gamification"
-    },
-    { 
-      icon: "💬", 
-      title: "Discussion Forum", 
-      description: "Ask questions and share knowledge", 
-      link: "#", 
-      color: "#4a90e2", 
-      bgColor: "rgba(74, 144, 226, 0.1)", 
-      comingSoon: true,
-      category: "Collaboration"
+      category: "🎮 Gamification"
     },
     { 
       icon: "📝", 
@@ -187,9 +194,8 @@ function Dashboard() {
       description: "Take quizzes and assessments", 
       link: "#", 
       color: "#f39c12", 
-      bgColor: "rgba(243, 156, 18, 0.1)", 
       comingSoon: true,
-      category: "Assessment"
+      category: "📝 Assessment"
     },
     { 
       icon: "⭐", 
@@ -197,9 +203,17 @@ function Dashboard() {
       description: "Access your saved materials", 
       link: "#", 
       color: "#e74c3c", 
-      bgColor: "rgba(231, 76, 60, 0.1)", 
       comingSoon: true,
-      category: "Personal"
+      category: "❤️ Personal"
+    },
+    { 
+      icon: "🎨", 
+      title: "Theme Customizer", 
+      description: "Change app appearance", 
+      link: "#", 
+      color: "#e84393", 
+      comingSoon: true,
+      category: "⚙️ Settings"
     },
     { 
       icon: "📱", 
@@ -207,9 +221,17 @@ function Dashboard() {
       description: "Download our mobile app", 
       link: "#", 
       color: "#3498db", 
-      bgColor: "rgba(52, 152, 219, 0.1)", 
       comingSoon: true,
-      category: "Tools"
+      category: "🔧 Tools"
+    },
+    { 
+      icon: "❓", 
+      title: "Help & Support", 
+      description: "Get assistance", 
+      link: "#", 
+      color: "#95a5a6", 
+      comingSoon: true,
+      category: "🔧 Tools"
     }
   ];
 
@@ -235,34 +257,108 @@ function Dashboard() {
     return date.toLocaleDateString();
   };
 
-  return (
-    <div style={{
+  // Dynamic styles based on theme
+  const styles = {
+    container: {
       minHeight: "calc(100vh - 80px)",
-      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%)",
+      background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.surface} 50%, ${theme.background} 100%)`,
       fontFamily: "'Poppins', 'Segoe UI', 'Montserrat', system-ui, sans-serif",
       display: "flex",
-      position: "relative"
-    }}>
+      position: "relative",
+      transition: "all 0.3s ease"
+    },
+    toggleButton: {
+      position: "fixed",
+      top: "100px",
+      left: sidebarOpen ? "280px" : "20px",
+      zIndex: 1000,
+      background: theme.gradient,
+      border: "none",
+      borderRadius: "8px",
+      padding: "10px",
+      color: "white",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+      display: "flex",
+      alignItems: "center",
+      gap: "5px"
+    },
+    sidebar: {
+      width: sidebarOpen ? "280px" : "0",
+      background: "linear-gradient(180deg, rgba(0,0,0,0.95), rgba(20,20,20,0.98))",
+      backdropFilter: "blur(10px)",
+      borderRight: sidebarOpen ? `1px solid ${theme.primary}4D` : "none",
+      transition: "width 0.3s ease",
+      overflow: "hidden",
+      position: "fixed",
+      top: "80px",
+      left: 0,
+      height: "calc(100vh - 80px)",
+      zIndex: 999,
+      display: "flex",
+      flexDirection: "column"
+    },
+    welcomeSection: {
+      background: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))`,
+      borderRadius: "20px",
+      padding: "2rem",
+      marginBottom: "2rem",
+      border: `1px solid ${theme.primary}33`,
+      position: "relative",
+      overflow: "hidden"
+    },
+    statCard: (borderColor) => ({
+      background: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))`,
+      borderRadius: "16px",
+      padding: "1.2rem",
+      textAlign: "center",
+      border: `1px solid ${borderColor}`,
+      transition: "transform 0.3s ease",
+      cursor: "pointer"
+    }),
+    recentUploadsSection: {
+      background: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))`,
+      borderRadius: "20px",
+      padding: "1.5rem",
+      marginBottom: "2rem",
+      border: `1px solid ${theme.primary}33`
+    },
+    uploadItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "1rem",
+      background: "rgba(255, 255, 255, 0.03)",
+      borderRadius: "12px",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      flexWrap: "wrap",
+      gap: "0.5rem"
+    },
+    infoCard: {
+      background: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))`,
+      borderRadius: "16px",
+      padding: "1.5rem",
+      border: `1px solid ${theme.primary}33`
+    }
+  };
+
+  const handleNavigation = (link, comingSoon) => {
+    if (comingSoon) {
+      setActiveQuickAction(link);
+      setTimeout(() => setActiveQuickAction(null), 2000);
+    } else if (link && link !== "#") {
+      navigate(link);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
       {/* Sidebar Toggle Button */}
       <button
         onClick={toggleSidebar}
-        style={{
-          position: "fixed",
-          top: "100px",
-          left: sidebarOpen ? "280px" : "20px",
-          zIndex: 1000,
-          background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
-          border: "none",
-          borderRadius: "8px",
-          padding: "10px",
-          color: "white",
-          cursor: "pointer",
-          transition: "all 0.3s ease",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-          display: "flex",
-          alignItems: "center",
-          gap: "5px"
-        }}
+        style={styles.toggleButton}
         onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
         onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
       >
@@ -270,27 +366,13 @@ function Dashboard() {
       </button>
 
       {/* Sidebar */}
-      <div style={{
-        width: sidebarOpen ? "280px" : "0",
-        background: "linear-gradient(180deg, rgba(0,0,0,0.95), rgba(20,20,20,0.98))",
-        backdropFilter: "blur(10px)",
-        borderRight: sidebarOpen ? "1px solid rgba(255, 140, 0, 0.3)" : "none",
-        transition: "width 0.3s ease",
-        overflow: "hidden",
-        position: "fixed",
-        top: "80px",
-        left: 0,
-        height: "calc(100vh - 80px)",
-        zIndex: 999,
-        display: "flex",
-        flexDirection: "column"
-      }}>
+      <div style={styles.sidebar}>
         {sidebarOpen && (
           <>
             {/* Sidebar Header */}
             <div style={{
               padding: "1.5rem",
-              borderBottom: "1px solid rgba(255, 140, 0, 0.2)",
+              borderBottom: `1px solid ${theme.primary}33`,
               textAlign: "center"
             }}>
               <div style={{
@@ -298,7 +380,7 @@ function Dashboard() {
                 marginBottom: "0.5rem"
               }}>🚀</div>
               <h3 style={{
-                color: "#FFA500",
+                color: theme.primary,
                 fontSize: "1.1rem",
                 fontWeight: 600,
                 marginBottom: "0.25rem"
@@ -306,7 +388,8 @@ function Dashboard() {
                 Quick Actions
               </h3>
               <p style={{
-                color: "#a0a0a0",
+                color: theme.text,
+                opacity: 0.7,
                 fontSize: "0.7rem"
               }}>
                 Navigate & Manage
@@ -322,7 +405,7 @@ function Dashboard() {
               {Object.entries(groupedActions).map(([category, actions]) => (
                 <div key={category} style={{ marginBottom: "1.5rem" }}>
                   <h4 style={{
-                    color: "#FF8C00",
+                    color: theme.primary,
                     fontSize: "0.75rem",
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -335,14 +418,7 @@ function Dashboard() {
                   {actions.map((action, index) => (
                     <div
                       key={index}
-                      onClick={() => {
-                        if (!action.comingSoon && action.link !== "#") {
-                          navigate(action.link);
-                        } else if (action.comingSoon) {
-                          setActiveQuickAction(action.title);
-                          setTimeout(() => setActiveQuickAction(null), 2000);
-                        }
-                      }}
+                      onClick={() => handleNavigation(action.link, action.comingSoon)}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -350,7 +426,7 @@ function Dashboard() {
                         padding: "0.75rem",
                         marginBottom: "0.5rem",
                         borderRadius: "12px",
-                        background: activeQuickAction === action.title && action.comingSoon 
+                        background: activeQuickAction === action.link && action.comingSoon 
                           ? "rgba(255, 193, 7, 0.2)"
                           : "rgba(255, 255, 255, 0.03)",
                         cursor: action.comingSoon ? "not-allowed" : "pointer",
@@ -360,7 +436,7 @@ function Dashboard() {
                       }}
                       onMouseEnter={(e) => {
                         if (!action.comingSoon) {
-                          e.currentTarget.style.background = "rgba(255, 140, 0, 0.1)";
+                          e.currentTarget.style.background = `${theme.primary}1A`;
                           e.currentTarget.style.transform = "translateX(5px)";
                         }
                       }}
@@ -381,7 +457,8 @@ function Dashboard() {
                           {action.title}
                         </div>
                         <div style={{
-                          color: "#a0a0a0",
+                          color: theme.text,
+                          opacity: 0.7,
                           fontSize: "0.7rem"
                         }}>
                           {action.description}
@@ -407,7 +484,7 @@ function Dashboard() {
             {/* Sidebar Footer */}
             <div style={{
               padding: "1rem",
-              borderTop: "1px solid rgba(255, 140, 0, 0.2)",
+              borderTop: `1px solid ${theme.primary}33`,
               textAlign: "center"
             }}>
               <div style={{
@@ -418,23 +495,30 @@ function Dashboard() {
                 marginBottom: "0.5rem"
               }}>
                 <span style={{ fontSize: "0.8rem" }}>💡</span>
-                <span style={{ color: "#a0a0a0", fontSize: "0.7rem" }}>
+                <span style={{ color: theme.text, opacity: 0.7, fontSize: "0.7rem" }}>
                   Pro Tips Available
                 </span>
               </div>
               <button
                 onClick={() => {
-                  alert("📚 Pro Tips:\n\n1. Upload materials regularly\n2. Use search to find content\n3. Organize by subjects\n4. Track your progress\n5. Join study groups (coming soon)");
+                  alert("📚 Pro Tips:\n\n1. Upload materials regularly\n2. Use search to find content\n3. Organize by subjects\n4. Track your progress\n5. Visit Analytics page for insights\n6. Join study groups to collaborate");
                 }}
                 style={{
-                  background: "rgba(255, 107, 0, 0.2)",
-                  border: "1px solid #FF6B00",
+                  background: `${theme.primary}33`,
+                  border: `1px solid ${theme.primary}`,
                   borderRadius: "8px",
                   padding: "0.4rem 0.8rem",
-                  color: "#FFA500",
+                  color: theme.primary,
                   fontSize: "0.7rem",
                   cursor: "pointer",
-                  width: "100%"
+                  width: "100%",
+                  transition: "all 0.3s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = `${theme.primary}4D`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = `${theme.primary}33`;
                 }}
               >
                 View Learning Tips
@@ -459,7 +543,7 @@ function Dashboard() {
           right: "-5%",
           width: "400px",
           height: "400px",
-          background: "radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%)",
+          background: `radial-gradient(circle, ${theme.primary}14 0%, transparent 70%)`,
           borderRadius: "50%",
           filter: "blur(80px)",
           pointerEvents: "none"
@@ -472,39 +556,28 @@ function Dashboard() {
           zIndex: 2
         }}>
           {/* Welcome Section with Time */}
-          <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "20px",
-            padding: "2rem",
-            marginBottom: "2rem",
-            border: "1px solid rgba(255, 140, 0, 0.2)",
-            position: "relative",
-            overflow: "hidden"
-          }}>
+          <div style={styles.welcomeSection}>
             <div style={{
               position: "absolute",
               top: "-50%",
               right: "-10%",
               width: "300px",
               height: "300px",
-              background: "radial-gradient(circle, rgba(255, 107, 0, 0.1), transparent)",
+              background: `radial-gradient(circle, ${theme.primary}1A, transparent)`,
               borderRadius: "50%"
             }}></div>
             <div>
               <h1 style={{
                 fontSize: "2rem",
                 fontWeight: 700,
-                marginBottom: "0.5rem"
+                marginBottom: "0.5rem",
+                color: theme.text
               }}>
-                {greeting}! <span style={{
-                  background: "linear-gradient(135deg, #FF6B00, #FF8C00, #FFA500)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent"
-                }}>{name || "Student"}</span> 👋
+                {greeting}! <span style={{ color: theme.primary }}>{name || "Student"}</span> 👋
               </h1>
               <p style={{
-                color: "#a0a0a0",
+                color: theme.text,
+                opacity: 0.8,
                 fontSize: "1rem",
                 marginBottom: "0.5rem"
               }}>
@@ -518,7 +591,7 @@ function Dashboard() {
                   minute: '2-digit' 
                 })}
               </p>
-              <p style={{ color: "#FFA500", fontSize: "0.95rem" }}>
+              <p style={{ color: theme.primary, fontSize: "0.95rem" }}>
                 Your smart learning platform to import, export and manage study materials effortlessly.
               </p>
             </div>
@@ -531,75 +604,130 @@ function Dashboard() {
             gap: "1rem",
             marginBottom: "2rem"
           }}>
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.2rem",
-              textAlign: "center",
-              border: "1px solid rgba(255, 140, 0, 0.2)",
-              transition: "transform 0.3s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
+            <div
+              style={styles.statCard(`${theme.primary}33`)}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+              onClick={() => navigate("/materials")}
+            >
               <div style={{ fontSize: "2rem" }}>📚</div>
-              <div style={{ color: "#FFA500", fontSize: "1.8rem", fontWeight: 700 }}>{stats.totalMaterials}</div>
-              <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>Total Materials</div>
+              <div style={{ color: theme.primary, fontSize: "1.8rem", fontWeight: 700 }}>{stats.totalMaterials}</div>
+              <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>Total Materials</div>
             </div>
             
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.2rem",
-              textAlign: "center",
-              border: "1px solid rgba(66, 133, 244, 0.2)",
-              transition: "transform 0.3s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
+            <div
+              style={styles.statCard("rgba(66, 133, 244, 0.2)")}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
               <div style={{ fontSize: "2rem" }}>👤</div>
               <div style={{ color: "#4285F4", fontSize: "1.8rem", fontWeight: 700 }}>{stats.myMaterials}</div>
-              <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>My Materials</div>
+              <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>My Materials</div>
             </div>
             
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.2rem",
-              textAlign: "center",
-              border: "1px solid rgba(40, 167, 69, 0.2)",
-              transition: "transform 0.3s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
+            <div
+              style={styles.statCard("rgba(40, 167, 69, 0.2)")}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
               <div style={{ fontSize: "2rem" }}>📄</div>
               <div style={{ color: "#28a745", fontSize: "1.8rem", fontWeight: 700 }}>{stats.pdfCount}</div>
-              <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>PDF Documents</div>
+              <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>PDF Documents</div>
             </div>
             
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.2rem",
-              textAlign: "center",
-              border: "1px solid rgba(23, 162, 184, 0.2)",
-              transition: "transform 0.3s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
+            <div
+              style={styles.statCard("rgba(23, 162, 184, 0.2)")}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-5px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
               <div style={{ fontSize: "2rem" }}>📝</div>
               <div style={{ color: "#17a2b8", fontSize: "1.8rem", fontWeight: 700 }}>{stats.docCount + stats.noteCount}</div>
-              <div style={{ color: "#a0a0a0", fontSize: "0.85rem" }}>Documents & Notes</div>
+              <div style={{ color: theme.text, opacity: 0.7, fontSize: "0.85rem" }}>Documents & Notes</div>
             </div>
           </div>
 
-          {/* Recent Uploads Section */}
+          {/* Quick Action Buttons Row */}
           <div style={{
-            background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-            borderRadius: "20px",
-            padding: "1.5rem",
-            marginBottom: "2rem",
-            border: "1px solid rgba(255, 140, 0, 0.2)"
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem"
           }}>
+            <button
+              onClick={() => navigate("/upload")}
+              style={{
+                padding: "1rem",
+                background: theme.gradient,
+                border: "none",
+                borderRadius: "12px",
+                color: "white",
+                cursor: "pointer",
+                fontWeight: 600,
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              📤 Upload Material
+            </button>
+            
+            <button
+              onClick={() => navigate("/materials")}
+              style={{
+                padding: "1rem",
+                background: "rgba(40, 167, 69, 0.2)",
+                border: `1px solid #28a745`,
+                borderRadius: "12px",
+                color: "#28a745",
+                cursor: "pointer",
+                fontWeight: 600,
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              📂 View Materials
+            </button>
+            
+            <button
+              onClick={() => navigate("/analytics")}
+              style={{
+                padding: "1rem",
+                background: "rgba(111, 66, 193, 0.2)",
+                border: `1px solid #6f42c1`,
+                borderRadius: "12px",
+                color: "#6f42c1",
+                cursor: "pointer",
+                fontWeight: 600,
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              📊 Analytics
+            </button>
+            
+            <button
+              onClick={() => navigate("/study-groups")}
+              style={{
+                padding: "1rem",
+                background: "rgba(253, 126, 20, 0.2)",
+                border: `1px solid #fd7e14`,
+                borderRadius: "12px",
+                color: "#fd7e14",
+                cursor: "pointer",
+                fontWeight: 600,
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-3px)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+            >
+              👥 Study Groups
+            </button>
+          </div>
+
+          {/* Recent Uploads Section */}
+          <div style={styles.recentUploadsSection}>
             <div style={{
               display: "flex",
               justifyContent: "space-between",
@@ -609,7 +737,7 @@ function Dashboard() {
               gap: "1rem"
             }}>
               <h3 style={{
-                color: "#FFA500",
+                color: theme.primary,
                 fontSize: "1.3rem",
                 fontWeight: 600,
                 margin: 0
@@ -619,22 +747,22 @@ function Dashboard() {
               <Link
                 to="/materials"
                 style={{
-                  color: "#FF8C00",
+                  color: theme.primary,
                   textDecoration: "none",
                   fontSize: "0.85rem",
                   transition: "color 0.3s ease"
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#FFA500"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "#FF8C00"}
+                onMouseEnter={(e) => e.currentTarget.style.color = theme.secondary}
+                onMouseLeave={(e) => e.currentTarget.style.color = theme.primary}
               >
-                View All →
+                View All Materials →
               </Link>
             </div>
             
             {loading ? (
               <div style={{ textAlign: "center", padding: "2rem" }}>
-                <div className="spinner"></div>
-                <p style={{ color: "#a0a0a0", marginTop: "1rem" }}>Loading recent uploads...</p>
+                <div className="spinner" style={{ borderTopColor: theme.primary }}></div>
+                <p style={{ color: theme.text, opacity: 0.7, marginTop: "1rem" }}>Loading recent uploads...</p>
               </div>
             ) : stats.recentUploads.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -642,18 +770,7 @@ function Dashboard() {
                   <div
                     key={material.id}
                     onClick={() => navigate(`/material/${material.id}`)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "1rem",
-                      background: "rgba(255, 255, 255, 0.03)",
-                      borderRadius: "12px",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease",
-                      flexWrap: "wrap",
-                      gap: "0.5rem"
-                    }}
+                    style={styles.uploadItem}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
                       e.currentTarget.style.transform = "translateX(5px)";
@@ -671,7 +788,7 @@ function Dashboard() {
                       <div>
                         <div style={{ color: "#ffffff", fontWeight: 500 }}>{material.title}</div>
                         {material.subject && (
-                          <div style={{ color: "#FFA500", fontSize: "0.75rem" }}>{material.subject}</div>
+                          <div style={{ color: theme.primary, fontSize: "0.75rem" }}>{material.subject}</div>
                         )}
                       </div>
                     </div>
@@ -683,18 +800,21 @@ function Dashboard() {
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "2rem" }}>
-                <p style={{ color: "#a0a0a0" }}>No uploads yet. Start by uploading your first material!</p>
+                <p style={{ color: theme.text, opacity: 0.7 }}>No uploads yet. Start by uploading your first material!</p>
                 <Link
                   to="/upload"
                   style={{
                     display: "inline-block",
                     marginTop: "1rem",
                     padding: "0.5rem 1rem",
-                    background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+                    background: theme.gradient,
                     borderRadius: "8px",
                     color: "white",
-                    textDecoration: "none"
+                    textDecoration: "none",
+                    transition: "all 0.3s ease"
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                 >
                   ➕ Upload Now
                 </Link>
@@ -709,38 +829,29 @@ function Dashboard() {
             gap: "1.5rem"
           }}>
             {/* Learning Tips */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              border: "1px solid rgba(255, 140, 0, 0.2)"
-            }}>
+            <div style={styles.infoCard}>
               <h3 style={{
-                color: "#FFA500",
+                color: theme.primary,
                 fontSize: "1.2rem",
                 fontWeight: 600,
                 marginBottom: "1rem"
               }}>
                 💡 Learning Tips
               </h3>
-              <ul style={{ color: "#a0a0a0", fontSize: "0.85rem", lineHeight: 1.8, paddingLeft: "1.2rem" }}>
+              <ul style={{ color: theme.text, opacity: 0.8, fontSize: "0.85rem", lineHeight: 1.8, paddingLeft: "1.2rem" }}>
                 <li>Upload your study materials to access them anytime</li>
                 <li>Organize content by subject for easy retrieval</li>
                 <li>Use search to quickly find specific topics</li>
                 <li>Review your uploaded materials regularly</li>
-                <li>Share resources with study groups (coming soon)</li>
+                <li>Check Analytics page for insights on your learning</li>
+                <li>Join Study Groups to collaborate with peers</li>
               </ul>
             </div>
 
             {/* Quick Stats */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              border: "1px solid rgba(255, 140, 0, 0.2)"
-            }}>
+            <div style={styles.infoCard}>
               <h3 style={{
-                color: "#FFA500",
+                color: theme.primary,
                 fontSize: "1.2rem",
                 fontWeight: 600,
                 marginBottom: "1rem"
@@ -749,8 +860,8 @@ function Dashboard() {
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "#a0a0a0" }}>Storage Used:</span>
-                  <span style={{ color: "#FFA500", fontWeight: 600 }}>
+                  <span style={{ color: theme.text, opacity: 0.8 }}>Storage Used:</span>
+                  <span style={{ color: theme.primary, fontWeight: 600 }}>
                     {Math.min(100, Math.floor((stats.totalMaterials / 50) * 100))}%
                   </span>
                 </div>
@@ -764,16 +875,16 @@ function Dashboard() {
                   <div style={{
                     width: `${Math.min(100, Math.floor((stats.totalMaterials / 50) * 100))}%`,
                     height: "100%",
-                    background: "linear-gradient(90deg, #FF6B00, #FF8C00)",
+                    background: theme.gradient,
                     borderRadius: "4px"
                   }}></div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-                  <span style={{ color: "#a0a0a0" }}>Active Materials:</span>
+                  <span style={{ color: theme.text, opacity: 0.8 }}>Active Materials:</span>
                   <span style={{ color: "#28a745", fontWeight: 600 }}>{stats.totalMaterials}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "#a0a0a0" }}>Completion Rate:</span>
+                  <span style={{ color: theme.text, opacity: 0.8 }}>Completion Rate:</span>
                   <span style={{ color: "#17a2b8", fontWeight: 600 }}>
                     {stats.totalMaterials > 0 ? Math.min(100, Math.floor((stats.myMaterials / stats.totalMaterials) * 100)) : 0}%
                   </span>
@@ -782,36 +893,32 @@ function Dashboard() {
             </div>
 
             {/* Need Help? */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
-              borderRadius: "16px",
-              padding: "1.5rem",
-              border: "1px solid rgba(255, 140, 0, 0.2)"
-            }}>
+            <div style={styles.infoCard}>
               <h3 style={{
-                color: "#FFA500",
+                color: theme.primary,
                 fontSize: "1.2rem",
                 fontWeight: 600,
                 marginBottom: "1rem"
               }}>
                 ❓ Need Help?
               </h3>
-              <p style={{ color: "#a0a0a0", fontSize: "0.85rem", marginBottom: "1rem" }}>
+              <p style={{ color: theme.text, opacity: 0.8, fontSize: "0.85rem", marginBottom: "1rem" }}>
                 Check out our documentation or contact support for assistance with managing your study materials.
               </p>
               <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                 <button
                   style={{
                     padding: "0.5rem 1rem",
-                    background: "rgba(255, 107, 0, 0.2)",
-                    border: "1px solid #FF6B00",
+                    background: `${theme.primary}33`,
+                    border: `1px solid ${theme.primary}`,
                     borderRadius: "8px",
-                    color: "#FFA500",
+                    color: theme.primary,
                     cursor: "pointer",
-                    fontSize: "0.85rem"
+                    fontSize: "0.85rem",
+                    transition: "all 0.3s ease"
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255, 107, 0, 0.3)"}
-                  onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255, 107, 0, 0.2)"}
+                  onMouseEnter={(e) => e.currentTarget.style.background = `${theme.primary}4D`}
+                  onMouseLeave={(e) => e.currentTarget.style.background = `${theme.primary}33`}
                   onClick={() => alert("📚 Documentation coming soon! Stay tuned for detailed guides.")}
                 >
                   📖 Documentation
@@ -824,8 +931,11 @@ function Dashboard() {
                     borderRadius: "8px",
                     color: "#a0a0a0",
                     cursor: "pointer",
-                    fontSize: "0.85rem"
+                    fontSize: "0.85rem",
+                    transition: "all 0.3s ease"
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(108, 117, 125, 0.3)"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "rgba(108, 117, 125, 0.2)"}
                   onClick={() => alert("📧 Support coming soon! For now, please check our FAQ section.")}
                 >
                   💬 Contact Support
@@ -847,29 +957,29 @@ function Dashboard() {
           display: inline-block;
           width: 30px;
           height: 30px;
-          border: 3px solid rgba(255, 140, 0, 0.3);
-          border-top: 3px solid #FF8C00;
+          border: 3px solid ${theme.primary}4D;
+          border-top: 3px solid ${theme.primary};
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
 
         /* Custom scrollbar for sidebar */
-        .sidebar-scroll::-webkit-scrollbar {
+        ::-webkit-scrollbar {
           width: 5px;
         }
         
-        .sidebar-scroll::-webkit-scrollbar-track {
+        ::-webkit-scrollbar-track {
           background: rgba(255, 255, 255, 0.05);
           border-radius: 10px;
         }
         
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: #FF8C00;
+        ::-webkit-scrollbar-thumb {
+          background: ${theme.primary};
           border-radius: 10px;
         }
         
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: #FFA500;
+        ::-webkit-scrollbar-thumb:hover {
+          background: ${theme.secondary};
         }
       `}</style>
     </div>
