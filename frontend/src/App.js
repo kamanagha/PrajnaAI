@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from "./context/ThemeContext";
 
 import Navbar from "./components/Navbar";
@@ -17,6 +19,8 @@ import StudyGroups from "./pages/StudyGroups";
 import DiscussionForum from "./pages/DiscussionForum";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import AdminDashboard from "./pages/AdminDashboard";
 
 
 function App() {
@@ -36,6 +40,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/dashboard"
@@ -82,8 +94,6 @@ function App() {
               }
             />
 
-
-
             <Route path="/study-groups" element={
               <ProtectedRoute>
                 <StudyGroups />  
@@ -111,6 +121,27 @@ function App() {
         </div>
         
         <Chatbot />
+        
+        {/* Toast Container for popup messages - positioned above navbar */}
+        <ToastContainer 
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+          style={{ zIndex: 9999 }}
+          toastStyle={{ 
+            marginTop: '80px',
+            zIndex: 9999,
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+          }}
+        />
       </BrowserRouter>
     </ThemeProvider>
   );

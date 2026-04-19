@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { useTheme } from "../context/ThemeContext";
 
@@ -13,6 +13,26 @@ function Navbar() {
     logout();
     navigate("/login");
   };
+
+  // Get user display name safely - FIX: Extract name from user object
+  const getUserDisplayName = () => {
+    if (!user) return "User";
+    if (typeof user === 'string') return user;
+    if (user.name) return user.name;
+    if (user.username) return user.username;
+    return "User";
+  };
+
+  // Close theme menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showThemeMenu && !event.target.closest('.theme-menu-container')) {
+        setShowThemeMenu(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showThemeMenu]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -62,6 +82,9 @@ function Navbar() {
       </nav>
     );
   }
+
+  // Check if user is admin
+  const isAdmin = localStorage.getItem("is_staff") === "true" || localStorage.getItem("is_superuser") === "true";
 
   return (
     <>
@@ -118,7 +141,7 @@ function Navbar() {
             flexWrap: "wrap"
           }}>
             {/* Theme Switcher Button */}
-            <div style={{ position: 'relative' }}>
+            <div className="theme-menu-container" style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
                 style={{
@@ -226,7 +249,7 @@ function Navbar() {
 
             {isAuthenticated && user ? (
               <>
-                {/* Welcome Message */}
+                {/* Welcome Message - FIX: Display user name properly */}
                 <div style={{
                   display: "flex",
                   alignItems: "center",
@@ -246,9 +269,42 @@ function Navbar() {
                     Welcome, <span style={{
                       fontWeight: 700,
                       color: "var(--primary-color)"
-                    }}>{user}</span>
+                    }}>{getUserDisplayName()}</span>
                   </span>
                 </div>
+
+                {/* Admin Dashboard Link - Only for admins */}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    style={{
+                      background: "linear-gradient(135deg, #FF6B00, #FF8C00)",
+                      color: "white",
+                      textDecoration: "none",
+                      padding: "0.6rem 1.5rem",
+                      borderRadius: "50px",
+                      fontWeight: 600,
+                      fontSize: "0.95rem",
+                      transition: "all 0.3s ease",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      boxShadow: "0 2px 8px rgba(255, 107, 0, 0.3)"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 107, 0, 0.5)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 2px 8px rgba(255, 107, 0, 0.3)";
+                    }}
+                  >
+                    👑 Admin Panel
+                  </Link>
+                )}
 
                 {/* Dashboard Button */}
                 <Link

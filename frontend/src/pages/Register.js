@@ -43,6 +43,8 @@ function Register() {
     setPopupMessage({ show: true, message, type });
     setError("");
     setSuccess("");
+    // Auto scroll to top to ensure popup is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Calculate password strength
@@ -117,7 +119,7 @@ function Register() {
     
       console.log("ERROR:", err.response);
     
-      // 🔥 Handle duplicate email specifically
+      // Handle duplicate email specifically
       if (err.response && err.response.data.error) {
         if (err.response.data.error.toLowerCase().includes("email")) {
           showPopup("⚠️ This email is already registered. Try logging in instead.", "error");
@@ -208,14 +210,14 @@ function Register() {
 
   return (
     <div style={styles.container}>
-      {/* Popup Notification */}
+      {/* Popup Notification - Fixed position below navbar */}
       {popupMessage.show && (
         <div style={{
           position: "fixed",
-          top: "20px",
+          top: "90px",
           right: "20px",
-          zIndex: 9999,
-          animation: "slideInRight 0.5s ease-out"
+          zIndex: 99999,
+          animation: "slideInRight 0.5s ease-out, fadeOut 0.5s ease-out 2.5s forwards"
         }}>
           <div style={{
             background: popupMessage.type === "success" 
@@ -224,12 +226,13 @@ function Register() {
             color: "white",
             padding: "1rem 1.5rem",
             borderRadius: "12px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
-            minWidth: "300px",
-            maxWidth: "450px"
+            minWidth: "320px",
+            maxWidth: "450px",
+            border: "1px solid rgba(255,255,255,0.2)"
           }}>
             <span style={{ fontSize: "1.5rem" }}>
               {popupMessage.type === "success" ? "✅" : "⚠️"}
@@ -245,7 +248,8 @@ function Register() {
                 color: "white",
                 cursor: "pointer",
                 marginLeft: "auto",
-                fontSize: "1.2rem"
+                fontSize: "1.2rem",
+                padding: "0 5px"
               }}
             >
               ✕
@@ -330,7 +334,7 @@ function Register() {
           </p>
         </div>
 
-        {/* Success Message */}
+        {/* Success Message - Inline */}
         {success && (
           <div style={{
             background: "rgba(40, 167, 69, 0.1)",
@@ -461,7 +465,7 @@ function Register() {
                 padding: "0.5rem",
                 transition: "color 0.3s ease"
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = theme.primaryLight || theme.primary}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.secondary}
               onMouseLeave={(e) => e.currentTarget.style.color = theme.primary}
             >
               {showPassword ? "👁️" : "👁️‍🗨️"}
@@ -551,7 +555,7 @@ function Register() {
                 padding: "0.5rem",
                 transition: "color 0.3s ease"
               }}
-              onMouseEnter={(e) => e.currentTarget.style.color = theme.primaryLight || theme.primary}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.secondary}
               onMouseLeave={(e) => e.currentTarget.style.color = theme.primary}
             >
               {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
@@ -624,7 +628,7 @@ function Register() {
                 transition: "all 0.3s ease"
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = theme.primaryLight || theme.primary;
+                e.currentTarget.style.color = theme.secondary;
                 e.currentTarget.style.textDecoration = "underline";
               }}
               onMouseLeave={(e) => {
@@ -706,6 +710,13 @@ function Register() {
           to {
             opacity: 1;
             transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeOut {
+          to {
+            opacity: 0;
+            visibility: hidden;
           }
         }
 
@@ -893,6 +904,26 @@ function Register() {
         button:active::after {
           width: 300px;
           height: 300px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: ${theme.surface};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: ${theme.primary};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: ${theme.secondary};
         }
       `}</style>
     </div>

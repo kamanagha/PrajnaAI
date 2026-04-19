@@ -132,6 +132,9 @@ def material_detail(request, id):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_material(request, id):
+    print(f"Delete material called with id: {id}")  # Debug print
+    print(f"Request path: {request.path}")  # Debug print
+    
     try:
         material = Material.objects.get(id=id)
         if material.user != request.user:
@@ -140,8 +143,8 @@ def delete_material(request, id):
         material.delete()
         return Response({"message": "Material deleted successfully"})
     except Material.DoesNotExist:
+        print(f"Material with id {id} not found")  # Debug print
         return Response({"error": "Material not found"}, status=404)
-
 
 # ✅ DOWNLOAD MATERIAL
 @api_view(['GET'])

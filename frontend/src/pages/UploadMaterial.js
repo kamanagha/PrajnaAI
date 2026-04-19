@@ -37,6 +37,8 @@ function UploadMaterial() {
 
   const showPopup = (message, type) => {
     setPopupMessage({ show: true, message, type });
+    // Auto scroll to top to ensure popup is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // File validation
@@ -329,14 +331,14 @@ function UploadMaterial() {
 
   return (
     <div style={styles.container}>
-      {/* Popup Notification */}
+      {/* Popup Notification - Fixed position below navbar */}
       {popupMessage.show && (
         <div style={{
           position: "fixed",
-          top: "20px",
+          top: "90px",
           right: "20px",
-          zIndex: 9999,
-          animation: "slideInRight 0.5s ease-out"
+          zIndex: 99999,
+          animation: "slideInRight 0.5s ease-out, fadeOut 0.5s ease-out 2.5s forwards"
         }}>
           <div style={{
             background: popupMessage.type === "success" 
@@ -345,12 +347,13 @@ function UploadMaterial() {
             color: "white",
             padding: "1rem 1.5rem",
             borderRadius: "12px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
-            minWidth: "300px",
-            maxWidth: "450px"
+            minWidth: "320px",
+            maxWidth: "450px",
+            border: "1px solid rgba(255,255,255,0.2)"
           }}>
             <span style={{ fontSize: "1.5rem" }}>
               {popupMessage.type === "success" ? "✅" : "⚠️"}
@@ -366,7 +369,8 @@ function UploadMaterial() {
                 color: "white",
                 cursor: "pointer",
                 marginLeft: "auto",
-                fontSize: "1.2rem"
+                fontSize: "1.2rem",
+                padding: "0 5px"
               }}
             >
               ✕
@@ -599,7 +603,7 @@ function UploadMaterial() {
             </div>
             
             {/* Image Preview */}
-            {preview && (
+            if (preview && (
               <div style={{ marginTop: "1rem", textAlign: "center" }}>
                 <img src={preview} alt="Preview" style={{
                   maxWidth: "200px",
@@ -608,7 +612,7 @@ function UploadMaterial() {
                   border: `1px solid ${theme.primary}4D`
                 }} />
               </div>
-            )}
+            )
             
             {fileError && (
               <p style={{ color: "#dc3545", fontSize: "0.75rem", marginTop: "0.5rem" }}>
@@ -738,9 +742,36 @@ function UploadMaterial() {
           }
         }
         
+        @keyframes fadeOut {
+          to {
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+        
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-10px); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: ${theme.surface};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: ${theme.primary};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: ${theme.secondary};
         }
       `}</style>
     </div>

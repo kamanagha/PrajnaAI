@@ -1,96 +1,95 @@
-// hooks/useAuth.js
 import { useState, useEffect } from 'react';
+import API from '../services/api';
 
-export const useAuth = () => {
+function useAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const checkAuth = () => {
-    // Check multiple storage locations for compatibility
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-    const name = localStorage.getItem('name');
-    const userData = localStorage.getItem('user');
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    const isStaff = localStorage.getItem('is_staff') === 'true';
+    const isSuperuser = localStorage.getItem('is_superuser') === 'true';
     
-    let userName = null;
-    let userEmail = null;
-    
-    if (name) {
-      userName = name;
-    } else if (userData) {
+    if (token && storedUser && storedUser !== "undefined" && storedUser !== "null") {
       try {
-        const parsed = JSON.parse(userData);
-        userName = parsed.name || parsed.username || "User";
-        userEmail = parsed.email;
+        const userData = JSON.parse(storedUser);
+        setIsAuthenticated(true);
+        setUser({ 
+          ...userData, 
+          is_staff: isStaff, 
+          is_superuser: isSuperuser 
+        });
       } catch (e) {
-        console.error('Error parsing user data:', e);
+        console.error("Error parsing user data:", e);
+        setIsAuthenticated(false);
+        setUser(null);
       }
-    }
-    
-    // Check if token exists and user is logged in
-    if (token && (userName || userEmail)) {
-      setUser(userName || userEmail || "User");
-      setIsAuthenticated(true);
-    } else {
-      setUser(null);
-      setIsAuthenticated(false);
     }
     setLoading(false);
-  };
-
-  useEffect(() => {
-    checkAuth();
-    
-    // Listen for custom auth change events
-    const handleAuthChange = () => {
-      checkAuth();
-    };
-    
-    // Listen for storage events (when localStorage changes in another tab)
-    const handleStorageChange = (e) => {
-      if (e.key === 'token' || e.key === 'authToken' || e.key === 'name' || e.key === 'user') {
-        checkAuth();
-      }
-    };
-    
-    window.addEventListener('authChange', handleAuthChange);
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Optional: Check every 2 seconds for changes (ensures navbar updates)
-    const interval = setInterval(() => {
-      checkAuth();
-    }, 2000);
-    
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange);
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
   }, []);
 
-  const logout = () => {
-    // Clear all authentication data
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('name');
-    localStorage.removeItem('user');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('email');
-    
-    // Clear session storage if any
-    sessionStorage.clear();
-    
-    // Update state
-    setUser(null);
-    setIsAuthenticated(false);
-    
-    // Dispatch events to notify all components
-    window.dispatchEvent(new Event('authChange'));
-    window.dispatchEvent(new Event('storage'));
+  const login = async (email, password) => {
+    try {
+      const response = await API.post('/users/login/', { email, password });
+      const { 
+        access, 
+        refresh, 
+        user_id, 
+        username, 
+        email: userEmail, 
+        name, 
+        is_staff, 
+        is_superuser 
+      } = response.data;
+      
+      // Store all user data in localStorage
+      localStorage.setItem('token', access);
+      localStorage.setItem('refresh_token', refresh);
+      localStorage.setItem('user_id', user_id);
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', userEmail);
+      localStorage.setItem('name', name || username);
+      localStorage.setItem('is_staff', is_staff);
+      localStorage.setItem('is_superuser', is_superuser);
+      localStorage.setItem('user', JSON.stringify({ 
+        id: user_id, 
+        username, 
+        email: userEmail, 
+        name: name || username,
+        is_staff, 
+        is_superuser 
+      }));
+      
+      const userObject = { 
+        id: user_id, 
+        username, 
+        email: userEmail, 
+        name: name || username, 
+        is_staff, 
+        is_superuser 
+      };
+      
+      setUser(userObject);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || error.response?.data?.message || 'Login failed' 
+      };
+    }
   };
 
-  return { user, loading, isAuthenticated, logout, checkAuth };
-};
+  const logout = () => {
+    localStorage.clear();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  return { user, loading, isAuthenticated, login, logout };
+}
 
 export default useAuth;

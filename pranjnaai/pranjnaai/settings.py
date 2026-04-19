@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     
     'users',
     'materials',
+    'admin_dashboard',
 ]
 
 MIDDLEWARE = [

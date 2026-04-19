@@ -31,6 +31,8 @@ path('api/materials/',include('materials.urls')),
 
 path('api/token/refresh/', TokenRefreshView.as_view()),
 
+path('api/admin/', include('admin_dashboard.urls')),
+
 
 ]
 

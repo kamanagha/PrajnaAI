@@ -13,7 +13,7 @@ urlpatterns = [
     path('<int:id>/', views.material_detail, name='material_detail'),
 
     # ✅ Delete material (only owner, JWT protected)
-    path('<int:id>/delete/', views.delete_material, name='delete_material'),
+    path('delete/<int:id>/', views.delete_material, name='delete_material'), 
 
     # ✅ Download material file
     path('materials/<int:id>/download/', views.download_material, name='download_material'),

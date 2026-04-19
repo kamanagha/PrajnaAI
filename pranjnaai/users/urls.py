@@ -7,6 +7,11 @@ urlpatterns = [
     # Existing user URLs
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
+    path('user-details/', views.get_user_details, name='user-details'),
+    path('update-profile/<int:user_id>/', views.update_user_profile, name='update-profile'),
+    path('change-password/', views.change_password, name='change-password'),
+    path('delete-user/<int:user_id>/', views.delete_user, name='delete-user'),
+    path('all-users/', views.get_all_users, name='all-users'),
     
     # Study Group URLs (these will be under /api/users/)
     path('study-groups/', study_groups.study_group_list, name='study_group_list'),

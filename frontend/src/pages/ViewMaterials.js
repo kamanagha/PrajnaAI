@@ -36,6 +36,8 @@ function ViewMaterials() {
 
   const showPopup = (message, type) => {
     setPopupMessage({ show: true, message, type });
+    // Auto scroll to top to ensure popup is visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -165,6 +167,7 @@ function ViewMaterials() {
     setType("all");
     setSelectedSubject("all");
     setSortBy("newest");
+    showPopup("All filters cleared!", "success");
   };
 
   // Get statistics
@@ -189,6 +192,12 @@ function ViewMaterials() {
       position: "relative",
       transition: "all 0.3s ease"
     },
+    gradientText: {
+      background: theme.gradient,
+      backgroundClip: "text",
+      WebkitBackgroundClip: "text",
+      color: "transparent"
+    },
     statCard: (borderColor) => ({
       background: "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(20,20,20,0.8))",
       borderRadius: "16px",
@@ -198,26 +207,28 @@ function ViewMaterials() {
       transition: "transform 0.3s ease"
     }),
     filtersContainer: {
-      background: "rgba(0, 0, 0, 0.5)",
+      background: "rgba(0, 0, 0, 0.7)",
       backdropFilter: "blur(10px)",
       borderRadius: "20px",
       padding: "1.5rem",
       marginBottom: "2rem",
-      border: `1px solid ${theme.primary}33`,
-      transition: "all 0.3s ease"
+      border: `2px solid ${theme.primary}`,
+      transition: "all 0.3s ease",
+      boxShadow: `0 5px 20px ${theme.primary}1A`
     },
     label: {
       display: "block",
       color: theme.primary,
       marginBottom: "0.5rem",
       fontSize: "0.85rem",
-      fontWeight: 500
+      fontWeight: 600,
+      letterSpacing: "0.5px"
     },
     input: {
       width: "100%",
-      padding: "0.7rem 1rem",
-      background: "rgba(255, 255, 255, 0.05)",
-      border: `1px solid ${theme.primary}4D`,
+      padding: "0.8rem 1rem",
+      background: "rgba(255, 255, 255, 0.1)",
+      border: `2px solid ${theme.primary}4D`,
       borderRadius: "12px",
       color: "#ffffff",
       fontSize: "0.9rem",
@@ -226,9 +237,9 @@ function ViewMaterials() {
     },
     select: {
       width: "100%",
-      padding: "0.7rem 1rem",
-      background: "rgba(255, 255, 255, 0.05)",
-      border: `1px solid ${theme.primary}4D`,
+      padding: "0.8rem 1rem",
+      background: "rgba(255, 255, 255, 0.1)",
+      border: `2px solid ${theme.primary}4D`,
       borderRadius: "12px",
       color: "#ffffff",
       fontSize: "0.9rem",
@@ -237,13 +248,14 @@ function ViewMaterials() {
     },
     viewButton: (isActive) => ({
       flex: 1,
-      padding: "0.7rem",
-      background: isActive ? theme.gradient : "rgba(255, 255, 255, 0.05)",
-      border: isActive ? "none" : `1px solid ${theme.primary}4D`,
+      padding: "0.8rem",
+      background: isActive ? theme.gradient : "rgba(255, 255, 255, 0.1)",
+      border: isActive ? "none" : `2px solid ${theme.primary}4D`,
       borderRadius: "12px",
       color: isActive ? "white" : theme.primary,
       cursor: "pointer",
-      transition: "all 0.3s ease"
+      transition: "all 0.3s ease",
+      fontWeight: 600
     }),
     materialCard: {
       cursor: "pointer",
@@ -267,40 +279,45 @@ function ViewMaterials() {
       transition: "all 0.3s ease"
     },
     deleteButton: {
-      background: "rgba(220, 53, 69, 0.9)",
+      position: "absolute",
+      top: "10px",
+      right: "10px",
+      background: "rgba(220, 53, 69, 0.95)",
       border: "none",
       borderRadius: "8px",
-      padding: "5px 10px",
+      padding: "5px 12px",
       color: "white",
       cursor: "pointer",
-      fontSize: "0.8rem",
+      fontSize: "0.75rem",
       transition: "all 0.3s ease",
-      zIndex: 10
+      zIndex: 10,
+      fontWeight: 600
     },
     ownerBadge: {
       position: "absolute",
       top: "10px",
       left: "10px",
-      background: `${theme.primary}33`,
+      background: `${theme.primary}CC`,
       border: `1px solid ${theme.primary}`,
       borderRadius: "6px",
-      padding: "2px 8px",
+      padding: "3px 10px",
       fontSize: "0.7rem",
-      color: theme.primary,
-      zIndex: 10
+      color: "white",
+      zIndex: 10,
+      fontWeight: 600
     }
   };
 
   return (
     <div style={styles.container}>
-      {/* Popup Notification */}
+      {/* Popup Notification - Fixed position above navbar */}
       {popupMessage.show && (
         <div style={{
           position: "fixed",
-          top: "20px",
+          top: "90px",
           right: "20px",
-          zIndex: 9999,
-          animation: "slideInRight 0.5s ease-out"
+          zIndex: 99999,
+          animation: "slideInRight 0.5s ease-out, fadeOut 0.5s ease-out 2.5s forwards"
         }}>
           <div style={{
             background: popupMessage.type === "success" 
@@ -309,12 +326,13 @@ function ViewMaterials() {
             color: "white",
             padding: "1rem 1.5rem",
             borderRadius: "12px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
-            minWidth: "300px",
-            maxWidth: "450px"
+            minWidth: "320px",
+            maxWidth: "450px",
+            border: "1px solid rgba(255,255,255,0.2)"
           }}>
             <span style={{ fontSize: "1.5rem" }}>
               {popupMessage.type === "success" ? "✅" : "⚠️"}
@@ -330,7 +348,8 @@ function ViewMaterials() {
                 color: "white",
                 cursor: "pointer",
                 marginLeft: "auto",
-                fontSize: "1.2rem"
+                fontSize: "1.2rem",
+                padding: "0 5px"
               }}
             >
               ✕
@@ -347,9 +366,9 @@ function ViewMaterials() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "rgba(0,0,0,0.8)",
-          backdropFilter: "blur(5px)",
-          zIndex: 10000,
+          background: "rgba(0,0,0,0.9)",
+          backdropFilter: "blur(8px)",
+          zIndex: 100000,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -361,11 +380,12 @@ function ViewMaterials() {
             padding: "2rem",
             maxWidth: "400px",
             textAlign: "center",
-            border: `1px solid rgba(255, 68, 68, 0.3)`
+            border: `2px solid ${theme.primary}`,
+            boxShadow: `0 10px 40px ${theme.primary}33`
           }}>
             <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
-            <h3 style={{ color: "#FF4444", marginBottom: "1rem" }}>Confirm Delete</h3>
-            <p style={{ color: theme.text, opacity: 0.8, marginBottom: "1.5rem" }}>
+            <h3 style={{ color: "#FF4444", marginBottom: "1rem", fontSize: "1.5rem" }}>Confirm Delete</h3>
+            <p style={{ color: theme.text, opacity: 0.8, marginBottom: "1.5rem", lineHeight: 1.6 }}>
               Are you sure you want to delete this material? This action cannot be undone.
             </p>
             <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
@@ -374,11 +394,15 @@ function ViewMaterials() {
                 style={{
                   padding: "0.7rem 1.5rem",
                   background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(255,255,255,0.3)",
                   borderRadius: "10px",
                   color: "#ffffff",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  transition: "all 0.3s ease"
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
               >
                 Cancel
               </button>
@@ -390,8 +414,12 @@ function ViewMaterials() {
                   border: "none",
                   borderRadius: "10px",
                   color: "white",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  fontWeight: 600,
+                  transition: "all 0.3s ease"
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
               >
                 Delete
               </button>
@@ -432,7 +460,7 @@ function ViewMaterials() {
             <h1 style={{
               fontSize: "2.5rem",
               fontWeight: 800,
-              color: theme.text,
+              ...styles.gradientText,
               marginBottom: "0.5rem"
             }}>
               📚 My Study Materials
@@ -505,12 +533,28 @@ function ViewMaterials() {
           </div>
         </div>
 
-        {/* Filters Section */}
+        {/* Filters Section - Enhanced Visibility */}
         <div style={styles.filtersContainer}>
           <div style={{
+            marginBottom: "1rem",
+            paddingBottom: "0.5rem",
+            borderBottom: `2px solid ${theme.primary}`,
+            display: "inline-block"
+          }}>
+            <h3 style={{
+              color: theme.primary,
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              margin: 0
+            }}>
+              🔍 Filter & Sort Materials
+            </h3>
+          </div>
+          
+          <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "1.2rem",
             alignItems: "end"
           }}>
             {/* Search Input */}
@@ -527,10 +571,12 @@ function ViewMaterials() {
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = theme.primary;
                   e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}1A`;
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = `${theme.primary}4D`;
                   e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
                 }}
               />
             </div>
@@ -544,11 +590,19 @@ function ViewMaterials() {
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 style={styles.select}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = `${theme.primary}4D`;
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                }}
               >
-                <option value="all">All Types</option>
-                <option value="pdf">PDF</option>
-                <option value="doc">DOC</option>
-                <option value="note">Notes</option>
+                <option value="all" style={{ background: theme.surface }}>All Types</option>
+                <option value="pdf" style={{ background: theme.surface }}>📄 PDF</option>
+                <option value="doc" style={{ background: theme.surface }}>📝 DOC</option>
+                <option value="note" style={{ background: theme.surface }}>📘 Notes</option>
               </select>
             </div>
 
@@ -562,10 +616,18 @@ function ViewMaterials() {
                   value={selectedSubject}
                   onChange={(e) => setSelectedSubject(e.target.value)}
                   style={styles.select}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = theme.primary;
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = `${theme.primary}4D`;
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                  }}
                 >
-                  <option value="all">All Subjects</option>
+                  <option value="all" style={{ background: theme.surface }}>All Subjects</option>
                   {subjects.map(subject => (
-                    <option key={subject} value={subject}>{subject}</option>
+                    <option key={subject} value={subject} style={{ background: theme.surface }}>{subject}</option>
                   ))}
                 </select>
               </div>
@@ -580,11 +642,19 @@ function ViewMaterials() {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 style={styles.select}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = theme.primary;
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = `${theme.primary}4D`;
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                }}
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title-asc">Title (A-Z)</option>
-                <option value="title-desc">Title (Z-A)</option>
+                <option value="newest" style={{ background: theme.surface }}>🆕 Newest First</option>
+                <option value="oldest" style={{ background: theme.surface }}>📅 Oldest First</option>
+                <option value="title-asc" style={{ background: theme.surface }}>🔤 Title (A-Z)</option>
+                <option value="title-desc" style={{ background: theme.surface }}>🔤 Title (Z-A)</option>
               </select>
             </div>
 
@@ -601,13 +671,13 @@ function ViewMaterials() {
                   onClick={() => setViewMode("grid")}
                   style={styles.viewButton(viewMode === "grid")}
                 >
-                  📱 Grid
+                  📱 Grid View
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
                   style={styles.viewButton(viewMode === "list")}
                 >
-                  📋 List
+                  📋 List View
                 </button>
               </div>
             </div>
@@ -618,21 +688,28 @@ function ViewMaterials() {
             <button
               onClick={clearFilters}
               style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1rem",
+                marginTop: "1.5rem",
+                padding: "0.6rem 1.2rem",
                 background: `${theme.primary}33`,
-                border: `1px solid ${theme.primary}`,
+                border: `2px solid ${theme.primary}`,
                 borderRadius: "10px",
                 color: theme.primary,
                 cursor: "pointer",
                 fontSize: "0.85rem",
-                transition: "all 0.3s ease"
+                transition: "all 0.3s ease",
+                fontWeight: 600,
+                width: "auto",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem"
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = `${theme.primary}4D`;
+                e.currentTarget.style.transform = "scale(1.02)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = `${theme.primary}33`;
+                e.currentTarget.style.transform = "scale(1)";
               }}
             >
               🗑️ Clear All Filters
@@ -650,10 +727,11 @@ function ViewMaterials() {
           gap: "1rem"
         }}>
           <p style={{ color: theme.text, opacity: 0.7, fontSize: "0.9rem" }}>
-            Showing {filtered.length} of {materials.length} materials
+            Showing <span style={{ color: theme.primary, fontWeight: 600 }}>{filtered.length}</span> of{" "}
+            <span style={{ color: theme.primary, fontWeight: 600 }}>{materials.length}</span> materials
           </p>
           {filtered.length === 0 && materials.length > 0 && (
-            <p style={{ color: theme.primary, fontSize: "0.9rem" }}>
+            <p style={{ color: theme.primary, fontSize: "0.9rem", fontWeight: 500 }}>
               No results found. Try adjusting your filters.
             </p>
           )}
@@ -676,7 +754,7 @@ function ViewMaterials() {
         {error && (
           <div style={{
             background: "rgba(220, 53, 69, 0.1)",
-            border: "1px solid rgba(220, 53, 69, 0.3)",
+            border: "2px solid rgba(220, 53, 69, 0.3)",
             borderRadius: "12px",
             padding: "1rem",
             textAlign: "center",
@@ -729,7 +807,7 @@ function ViewMaterials() {
                       e.currentTarget.style.transform = "scale(1.05)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(220, 53, 69, 0.9)";
+                      e.currentTarget.style.background = "rgba(220, 53, 69, 0.95)";
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
@@ -740,7 +818,7 @@ function ViewMaterials() {
                 {/* Owner Badge */}
                 {String(m.user_id) === String(currentUser) && (
                   <div style={styles.ownerBadge}>
-                    My Material
+                    ⭐ My Material
                   </div>
                 )}
 
@@ -761,7 +839,7 @@ function ViewMaterials() {
                     color: "#ffffff",
                     marginBottom: "0.5rem",
                     wordBreak: "break-word",
-                    paddingRight: viewMode === "grid" ? "0" : "60px"
+                    paddingRight: viewMode === "grid" ? "0" : "80px"
                   }}>
                     {m.title}
                   </h5>
@@ -868,6 +946,13 @@ function ViewMaterials() {
           }
         }
         
+        @keyframes fadeOut {
+          to {
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
+        
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -881,6 +966,39 @@ function ViewMaterials() {
           border-top: 3px solid ${theme.primary};
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: ${theme.surface};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: ${theme.primary};
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: ${theme.secondary};
+        }
+        
+        /* Select dropdown styling */
+        select option {
+          background: ${theme.surface};
+          color: white;
+          padding: 10px;
+        }
+        
+        /* Focus visible outline */
+        *:focus-visible {
+          outline: 2px solid ${theme.primary};
+          outline-offset: 2px;
         }
       `}</style>
     </div>
